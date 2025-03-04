@@ -2,17 +2,16 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract VouchMe is ERC721URIStorage {
-    using Counters for Counters.Counter;
     using ECDSA for bytes32;
     using Strings for uint256;
 
-    Counters.Counter private _tokenIds;
-    
+    uint256 private _tokenIdTracker; // Manually track token IDs
+
     // Maps user address to their received testimonial token IDs
     mapping(address => uint256[]) private _receivedTestimonials;
     
@@ -31,7 +30,7 @@ contract VouchMe is ERC721URIStorage {
     event TestimonialVerified(uint256 tokenId, address receiver);
     
     constructor() ERC721("VouchMe Testimonial", "VOUCH") {}
-    
+
     /**
      * @dev Creates a testimonial NFT based on a signed message
      * @param senderAddress Address of the sender who created the testimonial
@@ -53,15 +52,14 @@ contract VouchMe is ERC721URIStorage {
             )
         );
         
-        bytes32 ethSignedMessageHash = messageHash.toEthSignedMessageHash();
+        bytes32 ethSignedMessageHash = MessageHashUtils.toEthSignedMessageHash(messageHash);
         
         // Verify the signature matches the sender
         address recoveredSigner = ethSignedMessageHash.recover(signature);
         require(recoveredSigner == senderAddress, "Invalid signature");
-        
-        _tokenIds.increment();
-        uint256 newTokenId = _tokenIds.current();
-        
+
+        uint256 newTokenId = ++_tokenIdTracker; // Manually increment token ID
+
         // Mint the NFT to the receiver
         _mint(msg.sender, newTokenId);
         
@@ -85,7 +83,7 @@ contract VouchMe is ERC721URIStorage {
         
         return newTokenId;
     }
-    
+
     /**
      * @dev Gets all testimonials received by a specific address
      * @param receiver The address to get testimonials for
@@ -101,10 +99,10 @@ contract VouchMe is ERC721URIStorage {
      * @return Testimonial struct containing details
      */
     function getTestimonialDetails(uint256 tokenId) external view returns (Testimonial memory) {
-        require(_exists(tokenId), "Testimonial does not exist");
+        require(_ownerOf(tokenId) != address(0), "Testimonial does not exist");
         return _testimonials[tokenId];
     }
-    
+
     /**
      * @dev Gets the total number of testimonials received by an address
      * @param receiver The address to check
@@ -149,14 +147,5 @@ contract VouchMe is ERC721URIStorage {
      */
     function addressToString(address _address) internal pure returns (string memory) {
         return Strings.toHexString(uint256(uint160(_address)), 20);
-    }
-    
-    /**
-     * @dev Check if a token exists
-     * @param tokenId The token ID to check
-     * @return bool Whether the token exists
-     */
-    function _exists(uint256 tokenId) internal view returns (bool) {
-        return _ownerOf(tokenId) != address(0);
     }
 }

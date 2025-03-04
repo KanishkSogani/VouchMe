@@ -82,7 +82,6 @@ contract VouchMe is ERC721URIStorage {
         _setTokenURI(newTokenId, tokenURI);
         
         emit TestimonialCreated(newTokenId, senderAddress, msg.sender);
-        emit TestimonialVerified(newTokenId, msg.sender);
         
         return newTokenId;
     }
@@ -134,6 +133,15 @@ contract VouchMe is ERC721URIStorage {
                 '"}'
             )
         );
+    }
+
+    /**
+     * @dev Prevents token transfers by allowing only minting.
+     */
+    function _update(address to, uint256 tokenId, address auth) internal override returns (address) {
+        require(_ownerOf(tokenId) == address(0), "Tokens are non-transferrable");
+
+        return super._update(to, tokenId, auth);
     }
     
     /**

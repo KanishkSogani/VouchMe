@@ -5,7 +5,7 @@ import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { scrollSepolia } from "wagmi/chains";
 import { publicConfig, enhancedConfig } from "@/utils/config";
-import Navbar from "@/components/LandingPage/Navbar";
+import Navbar from "@/components/Navbar";
 import "@rainbow-me/rainbowkit/styles.css";
 
 const queryClient = new QueryClient();
@@ -22,7 +22,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     getInitialEnhancedConfig()
   );
 
-  // Effect to handle initialization
   useEffect(() => {
     const savedPreference =
       localStorage.getItem("useEnhancedConfig") === "true";

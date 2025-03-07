@@ -209,12 +209,12 @@ function Dashboard() {
 
         {/* Testimonials Section */}
         <h2 className="text-3xl font-bold mb-6">My Testimonials</h2>
-        <div className="grid gap-4">
+        <div className="space-y-6">
           {testimonials.length > 0 ? (
             testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className="bg-[#2a2a2a] rounded-xl p-6 m-2 hover:bg-[#2d2d2d] transition-colors"
+                className="bg-[#2a2a2a] rounded-xl p-6 hover:bg-[#2d2d2d] transition-colors"
               >
                 <p className="text-lg mb-6">{testimonial.content}</p>
                 <div className="flex flex-wrap justify-between items-center gap-4 text-sm text-gray-400">
@@ -222,17 +222,26 @@ function Dashboard() {
                     <div className="w-8 h-8 rounded-full bg-indigo-600/20 flex items-center justify-center">
                       <span className="font-mono text-xs">From</span>
                     </div>
-                    <span className="font-mono">{testimonial.fromAddress}</span>
+                    <span className="font-mono">
+                      {truncateText(testimonial.fromAddress)}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                    Blockchain Verified
+                  <div className="flex items-center gap-4">
+                    <span className="text-gray-500">
+                      {new Date(
+                        testimonial.timestamp * 1000
+                      ).toLocaleDateString()}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                      Verified
+                    </div>
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <div className="bg-[#2a2a2a] rounded-xl p-6 text-center">
+            <div className="bg-[#2a2a2a] rounded-xl p-8 text-center">
               <p className="text-gray-400">
                 No testimonials yet. Share your link to collect testimonials!
               </p>

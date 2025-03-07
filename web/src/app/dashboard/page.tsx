@@ -1,46 +1,138 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Copy, CheckCircle } from "lucide-react";
+import { useAccount } from "wagmi";
+import { ethers } from "ethers";
+import { CONTRACT_ABI } from "@/utils/contract";
+
+const CONTRACT_ADDRESS = "0x51a11e08643c9df6ceb5f7fb41a72334cfa7d1d6";
 
 interface Testimonial {
   content: string;
   fromAddress: string;
   timestamp: number;
+  verified: boolean;
+}
+
+interface SignedTestimonial {
+  senderAddress: string;
+  receiverAddress: string;
+  content: string;
+  signature: string;
 }
 
 function Dashboard() {
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([
-    {
-      content:
-        "VouchMe has transformed how we collect and verify testimonials. Highly recommended!",
-      fromAddress: "0x1234...5678",
-      timestamp: Date.now(),
-    },
-    {
-      content:
-        "The blockchain verification feature gives our testimonials real credibility. Great platform!",
-      fromAddress: "0x9abc...def0",
-      timestamp: Date.now() - 86400000,
-    },
-  ]);
+  const { address } = useAccount();
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [newTestimonial, setNewTestimonial] = useState("");
   const [copied, setCopied] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const shareableLink = "vouch.me/[your-address]";
+  const shareableLink = `vouch.me/${address}`;
 
-  const handleAddTestimonial = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTestimonial.trim()) return;
+  // Fetch testimonials using ethers.js
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      if (!address) return;
 
-    // In a real app, this would interact with the blockchain
-    const testimonial: Testimonial = {
-      content: newTestimonial,
-      fromAddress: "0x" + Math.random().toString(16).slice(2, 10),
-      timestamp: Date.now(),
+      try {
+        const ethereum = (window as any).ethereum;
+        if (!ethereum) return;
+
+        const provider = new ethers.BrowserProvider(ethereum);
+        const contract = new ethers.Contract(
+          CONTRACT_ADDRESS,
+          CONTRACT_ABI,
+          provider
+        );
+
+        // Get testimonial IDs
+        const testimonialIds = await contract.getReceivedTestimonials(address);
+
+        if (!testimonialIds || testimonialIds.length === 0) {
+          setTestimonials([]);
+          return;
+        }
+
+        // Get testimonial details for each ID
+        const details = await Promise.all(
+          testimonialIds.map((id) => contract.getTestimonialDetails(id))
+        );
+
+        const formattedTestimonials = details.map((detail: any) => ({
+          content: detail.content,
+          fromAddress: detail.sender,
+          timestamp: Number(detail.timestamp),
+          verified: detail.verified,
+        }));
+
+        setTestimonials(formattedTestimonials);
+      } catch (error) {
+        console.error("Error fetching testimonials:", error);
+      }
     };
 
-    setTestimonials([testimonial, ...testimonials]);
-    setNewTestimonial("");
+    fetchTestimonials();
+  }, [address]);
+
+  const handleAddTestimonial = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTestimonial.trim() || !address) return;
+
+    try {
+      setIsLoading(true);
+      const signedData: SignedTestimonial = JSON.parse(newTestimonial);
+      const ethereum = (window as any).ethereum;
+
+      if (!ethereum) {
+        console.error("No Ethereum provider found");
+        return;
+      }
+
+      const provider = new ethers.BrowserProvider(ethereum);
+      const contract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        CONTRACT_ABI,
+        provider
+      );
+      const signer = await provider.getSigner();
+      const contractWithSigner = contract.connect(signer);
+
+      // Call the contract method directly
+      const tx = await contractWithSigner.createTestimonial(
+        signedData.senderAddress,
+        signedData.content,
+        signedData.signature
+      );
+
+      console.log("Transaction sent:", tx.hash);
+      setNewTestimonial("");
+
+      // Wait for transaction confirmation
+      await tx.wait();
+
+      // Refresh testimonials
+      const testimonialIds = await contract.getReceivedTestimonials(address);
+
+      if (testimonialIds && testimonialIds.length > 0) {
+        const details = await Promise.all(
+          testimonialIds.map((id) => contract.getTestimonialDetails(id))
+        );
+
+        const formattedTestimonials = details.map((detail: any) => ({
+          content: detail.content,
+          fromAddress: detail.sender,
+          timestamp: Number(detail.timestamp),
+          verified: detail.verified,
+        }));
+
+        setTestimonials(formattedTestimonials);
+      }
+    } catch (error) {
+      console.error("Error adding testimonial:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const copyLink = () => {
@@ -100,9 +192,10 @@ function Dashboard() {
             />
             <button
               type="submit"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              disabled={isLoading}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:bg-indigo-400"
             >
-              Add to Blockchain
+              {isLoading ? "Processing..." : "Add to Blockchain"}
             </button>
           </form>
         </div>
@@ -110,28 +203,36 @@ function Dashboard() {
         {/* Testimonials Section */}
         <h2 className="text-3xl font-bold mb-6">My Testimonials</h2>
         <div className="grid gap-4">
-          {testimonials.map((testimonial, index) => (
-            <div
-              key={index}
-              className="bg-[#2a2a2a] rounded-xl p-6 hover:bg-[#2d2d2d] transition-colors"
-            >
-              <p className="text-lg mb-6">{testimonial.content}</p>
-              <div className="flex flex-wrap justify-between items-center gap-4 text-sm text-gray-400">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-indigo-600/20 flex items-center justify-center">
-                    <span className="font-mono text-xs">
-                      {testimonial.fromAddress.slice(0, 6)}
-                    </span>
+          {testimonials.length > 0 ? (
+            testimonials.map((testimonial, index) => (
+              <div
+                key={index}
+                className="bg-[#2a2a2a] rounded-xl p-6 hover:bg-[#2d2d2d] transition-colors"
+              >
+                <p className="text-lg mb-6">{testimonial.content}</p>
+                <div className="flex flex-wrap justify-between items-center gap-4 text-sm text-gray-400">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-indigo-600/20 flex items-center justify-center">
+                      <span className="font-mono text-xs">
+                        {testimonial.fromAddress.slice(0, 6)}
+                      </span>
+                    </div>
+                    <span className="font-mono">{testimonial.fromAddress}</span>
                   </div>
-                  <span className="font-mono">{testimonial.fromAddress}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  Blockchain Verified
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                    Blockchain Verified
+                  </div>
                 </div>
               </div>
+            ))
+          ) : (
+            <div className="bg-[#2a2a2a] rounded-xl p-6 text-center">
+              <p className="text-gray-400">
+                No testimonials yet. Share your link to collect testimonials!
+              </p>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>

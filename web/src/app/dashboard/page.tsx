@@ -28,7 +28,7 @@ function Dashboard() {
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const shareableLink = `vouch.me/${address}`;
+  const shareableLink = `localhost:3000/write/${address}`;
 
   // Fetch testimonials using ethers.js
   useEffect(() => {
@@ -135,6 +135,13 @@ function Dashboard() {
     }
   };
 
+  // Function to truncate address/text
+  const truncateText = (text: string, startLength = 6, endLength = 4) => {
+    if (!text) return "";
+    if (text.length <= startLength + endLength) return text;
+    return `${text.slice(0, startLength)}...${text.slice(-endLength)}`;
+  };
+
   const copyLink = () => {
     navigator.clipboard.writeText(shareableLink);
     setCopied(true);
@@ -163,8 +170,8 @@ function Dashboard() {
           <div className="bg-[#2a2a2a] rounded-xl p-6">
             <h2 className="text-xl font-semibold mb-4">Your Collection Link</h2>
             <div className="flex items-center gap-3">
-              <div className="flex-1 bg-[#3a3a3a] rounded-lg px-4 py-3 font-mono text-sm">
-                {shareableLink}
+              <div className="flex-1 bg-[#3a3a3a] rounded-lg px-4 py-3 font-mono text-sm overflow-hidden">
+                {truncateText(shareableLink, 24, 8)}
               </div>
               <button
                 onClick={copyLink}
@@ -207,15 +214,13 @@ function Dashboard() {
             testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className="bg-[#2a2a2a] rounded-xl p-6 hover:bg-[#2d2d2d] transition-colors"
+                className="bg-[#2a2a2a] rounded-xl p-6 m-2 hover:bg-[#2d2d2d] transition-colors"
               >
                 <p className="text-lg mb-6">{testimonial.content}</p>
                 <div className="flex flex-wrap justify-between items-center gap-4 text-sm text-gray-400">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-indigo-600/20 flex items-center justify-center">
-                      <span className="font-mono text-xs">
-                        {testimonial.fromAddress.slice(0, 6)}
-                      </span>
+                      <span className="font-mono text-xs">From</span>
                     </div>
                     <span className="font-mono">{testimonial.fromAddress}</span>
                   </div>

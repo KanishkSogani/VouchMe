@@ -27,7 +27,7 @@ export default function WritePage({ params }: { params: { address: string } }) {
       );
 
       // Sign the message directly with personal_sign
-      // No need to add prefix manually as personal_sign does this automatically
+
       const ethereum = (window as any).ethereum;
       const signature = await ethereum.request({
         method: "personal_sign",
@@ -51,7 +51,7 @@ export default function WritePage({ params }: { params: { address: string } }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white py-6">
+    <div className="min-h-screen bg-[#1a1a1a] text-white py-6">
       <div className="max-w-2xl mx-auto px-4">
         <h1 className="text-3xl font-bold mb-6">Create Signed Testimonial</h1>
         <form onSubmit={handleCreateSignedMessage} className="space-y-4">

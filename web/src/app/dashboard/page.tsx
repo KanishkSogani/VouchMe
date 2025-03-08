@@ -1,11 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Copy, CheckCircle } from "lucide-react";
-import { useAccount } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 import { ethers } from "ethers";
-import { CONTRACT_ABI } from "@/utils/contract";
-
-const CONTRACT_ADDRESS = "0x51a11e08643c9df6ceb5f7fb41a72334cfa7d1d6";
+import { CONTRACT_ABI, CONTRACT_ADDRESSES } from "@/utils/contract";
 
 interface Testimonial {
   content: string;
@@ -23,10 +21,14 @@ interface SignedTestimonial {
 
 function Dashboard() {
   const { address } = useAccount();
+  const chainId = useChainId();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [newTestimonial, setNewTestimonial] = useState("");
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const CONTRACT_ADDRESS =
+    CONTRACT_ADDRESSES[chainId] || CONTRACT_ADDRESSES[534351];
 
   const shareableLink = `localhost:3000/write/${address}`;
 

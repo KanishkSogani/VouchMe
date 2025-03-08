@@ -5,7 +5,7 @@ export const mordor = defineChain({
   name: "Mordor Testnet",
   nativeCurrency: { name: "Mordor Ether", symbol: "METC", decimals: 18 },
   rpcUrls: {
-    default: { http: ["https://www.ethercluster.com/mordor"] },
+    default: { http: ["https://rpc.mordor.etccooperative.org"] },
   },
   blockExplorers: {
     default: { name: "BlockScout", url: "https://blockscout.com/etc/mordor" },

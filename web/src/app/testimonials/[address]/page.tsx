@@ -1,9 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { CONTRACT_ABI } from "@/utils/contract";
-
-const CONTRACT_ADDRESS = "0x51a11e08643c9df6ceb5f7fb41a72334cfa7d1d6";
+import { useChainId } from "wagmi";
+import { CONTRACT_ABI, CONTRACT_ADDRESSES } from "@/utils/contract";
 
 interface Testimonial {
   content: string;
@@ -20,7 +19,10 @@ export default function TestimonialsPage({
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const chainId = useChainId();
 
+  const CONTRACT_ADDRESS =
+    CONTRACT_ADDRESSES[chainId] || CONTRACT_ADDRESSES[534351];
   useEffect(() => {
     const fetchTestimonials = async () => {
       if (!params.address) return;

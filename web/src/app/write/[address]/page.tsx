@@ -66,18 +66,18 @@ export default function WritePage({ params }: { params: { address: string } }) {
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:bg-indigo-400"
             disabled={!connectedAddress || isLoading}
           >
-            {isLoading ? "Signing..." : "Create Signed Message"}
+            {isLoading ? "Signing..." : "Sign Testimonial"}
           </button>
         </form>
         {signedMessage && (
           <div className="mt-4">
-            <h2 className="text-xl font-semibold mb-2">Signed Message</h2>
+            <h2 className="text-xl font-semibold mb-2">Signed Testimonial</h2>
             <pre className="bg-gray-800 p-4 rounded-lg overflow-auto">
               {signedMessage}
             </pre>
             <div className="mt-4">
               <p className="text-gray-400 mb-2">
-                Share this signed message with the testimonial receiver.
+                Share this signed testimonial with the testimonial receiver.
               </p>
               <button
                 onClick={() => {

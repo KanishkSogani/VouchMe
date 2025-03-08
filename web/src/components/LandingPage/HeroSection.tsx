@@ -1,9 +1,11 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { Highlight } from "../ui/hero-highlight";
+import { useAccount } from "wagmi";
 
 const HeroSection = () => {
   const router = useRouter();
+  const { address } = useAccount();
 
   return (
     <div className="h-auto pt-20 pb-20 md:pb-48 bg-[#171717] flex flex-col items-center justify-center text-center px-4 py-16">
@@ -25,7 +27,10 @@ const HeroSection = () => {
           Start Collecting Testimonials
         </button>
 
-        <button className="px-8 py-3 bg-transparent hover:bg-gray-800 text-white border border-gray-600 rounded-lg font-medium transition-colors">
+        <button
+          onClick={() => router.push(`/testimonials/${address}`)}
+          className="px-8 py-3 bg-transparent hover:bg-gray-800 text-white border border-gray-600 rounded-lg font-medium transition-colors"
+        >
           View Showcase
         </button>
       </div>

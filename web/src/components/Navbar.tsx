@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
@@ -15,8 +16,10 @@ const Navbar = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { address } = useAccount();
+  const pathname = usePathname();
 
   const isAuthenticated = !!address;
+  const isLandingPage = pathname === "/";
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -37,20 +40,23 @@ const Navbar = ({
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <button
-              onClick={() => scrollToSection("features")}
-              className="text-gray-300 hover:text-white transition-colors font-semibold"
-            >
-              Features
-            </button>
-            <button
-              onClick={() => scrollToSection("footer")}
-              className="text-gray-300 hover:text-white transition-colors font-semibold"
-            >
-              About Us
-            </button>
+            {isLandingPage && (
+              <>
+                <button
+                  onClick={() => scrollToSection("features")}
+                  className="text-gray-300 hover:text-white transition-colors font-semibold"
+                >
+                  Why VouchMe
+                </button>
+                <button
+                  onClick={() => scrollToSection("footer")}
+                  className="text-gray-300 hover:text-white transition-colors font-semibold"
+                >
+                  About Us
+                </button>
+              </>
+            )}
 
-            {/* Only show toggle button when NOT authenticated */}
             {!isAuthenticated && (
               <button
                 onClick={toggleWalletConfig}
@@ -62,7 +68,6 @@ const Navbar = ({
               </button>
             )}
 
-            {/* Standard RainbowKit Connect Button */}
             <ConnectButton />
           </div>
 
@@ -85,20 +90,23 @@ const Navbar = ({
         {isOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-3">
-              <button
-                onClick={() => scrollToSection("features")}
-                className="block w-full text-left px-3 py-2 text-gray-300 hover:text-white transition-colors"
-              >
-                Features
-              </button>
-              <button
-                onClick={() => scrollToSection("footer")}
-                className="block w-full text-left px-3 py-2 text-gray-300 hover:text-white transition-colors"
-              >
-                About Us
-              </button>
+              {isLandingPage && (
+                <>
+                  <button
+                    onClick={() => scrollToSection("features")}
+                    className="block w-full text-left px-3 py-2 text-gray-300 hover:text-white transition-colors"
+                  >
+                    Why VouchMe
+                  </button>
+                  <button
+                    onClick={() => scrollToSection("footer")}
+                    className="block w-full text-left px-3 py-2 text-gray-300 hover:text-white transition-colors"
+                  >
+                    About Us
+                  </button>
+                </>
+              )}
 
-              {/* Only show toggle button when NOT authenticated (Mobile) */}
               {!isAuthenticated && (
                 <button
                   onClick={toggleWalletConfig}
@@ -110,7 +118,6 @@ const Navbar = ({
                 </button>
               )}
 
-              {/* Standard RainbowKit Connect Button (Mobile) */}
               <div className="py-2">
                 <ConnectButton />
               </div>

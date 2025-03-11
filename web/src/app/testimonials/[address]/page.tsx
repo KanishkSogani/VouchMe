@@ -2,8 +2,10 @@
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useChainId } from "wagmi";
+import { useParams } from "next/navigation";
 import { CONTRACT_ABI, CONTRACT_ADDRESSES } from "@/utils/contract";
 
+// Define the testimonial interface
 interface Testimonial {
   content: string;
   fromAddress: string;
@@ -11,24 +13,20 @@ interface Testimonial {
   verified: boolean;
 }
 
-interface TestimonialsPageProps {
-  params: {
-    address: string;
-  };
-}
-
-export default function TestimonialsPage({ params }: TestimonialsPageProps) {
+export default function TestimonialsPage() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const chainId = useChainId();
+  const params = useParams(); // Access dynamic route params
+  const address = params?.address as string; // Type assertion for the address param
 
   const CONTRACT_ADDRESS =
     CONTRACT_ADDRESSES[chainId] || CONTRACT_ADDRESSES[534351];
 
   useEffect(() => {
     const fetchTestimonials = async () => {
-      if (!params.address) return;
+      if (!address) return;
 
       try {
         const ethereum = window.ethereum;
@@ -44,17 +42,13 @@ export default function TestimonialsPage({ params }: TestimonialsPageProps) {
           provider
         );
 
-        // Get testimonial IDs for the address
-        const testimonialIds = await contract.getReceivedTestimonials(
-          params.address
-        );
+        const testimonialIds = await contract.getReceivedTestimonials(address);
 
         if (!testimonialIds || testimonialIds.length === 0) {
           setTestimonials([]);
           return;
         }
 
-        // Get testimonial details for each ID
         const details = await Promise.all(
           testimonialIds.map((id: number) => contract.getTestimonialDetails(id))
         );
@@ -76,14 +70,12 @@ export default function TestimonialsPage({ params }: TestimonialsPageProps) {
     };
 
     fetchTestimonials();
-  }, [params.address, CONTRACT_ADDRESS]);
+  }, [address, CONTRACT_ADDRESS]);
 
-  // Function to format timestamp
   const formatDate = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleDateString();
   };
 
-  // Function to truncate address
   const truncateAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
@@ -119,7 +111,7 @@ export default function TestimonialsPage({ params }: TestimonialsPageProps) {
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold mb-4">Public Testimonials</h1>
           <p className="text-gray-400">
-            Viewing testimonials for {truncateAddress(params.address)}
+            Viewing testimonials for {truncateAddress(address)}
           </p>
           <div className="mt-2 text-sm">
             <span className="bg-indigo-600/20 text-indigo-400 px-3 py-1 rounded-full">

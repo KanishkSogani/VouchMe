@@ -28,7 +28,7 @@ export default function TestimonialsPage({
       if (!params.address) return;
 
       try {
-        const ethereum = (window as any).ethereum;
+        const ethereum = window.ethereum;
         if (!ethereum) {
           setError("No Ethereum provider found. Please install a wallet.");
           return;
@@ -53,10 +53,10 @@ export default function TestimonialsPage({
 
         // Get testimonial details for each ID
         const details = await Promise.all(
-          testimonialIds.map((id) => contract.getTestimonialDetails(id))
+          testimonialIds.map((id: number) => contract.getTestimonialDetails(id))
         );
 
-        const formattedTestimonials = details.map((detail: any) => ({
+        const formattedTestimonials = details.map((detail) => ({
           content: detail.content,
           fromAddress: detail.sender,
           timestamp: Number(detail.timestamp),
@@ -73,7 +73,7 @@ export default function TestimonialsPage({
     };
 
     fetchTestimonials();
-  }, [params.address]);
+  }, [params.address, CONTRACT_ADDRESS]);
 
   // Function to format timestamp
   const formatDate = (timestamp: number) => {

@@ -28,7 +28,7 @@ export default function WritePage({ params }: { params: { address: string } }) {
 
       // Sign the message directly with personal_sign
 
-      const ethereum = (window as any).ethereum;
+      const ethereum = window.ethereum;
       const signature = await ethereum.request({
         method: "personal_sign",
         params: [messageHash, senderAddress],

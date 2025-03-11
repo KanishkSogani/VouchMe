@@ -38,7 +38,7 @@ function Dashboard() {
       if (!address) return;
 
       try {
-        const ethereum = (window as any).ethereum;
+        const ethereum = window.ethereum;
         if (!ethereum) return;
 
         const provider = new ethers.BrowserProvider(ethereum);
@@ -58,10 +58,10 @@ function Dashboard() {
 
         // Get testimonial details for each ID
         const details = await Promise.all(
-          testimonialIds.map((id) => contract.getTestimonialDetails(id))
+          testimonialIds.map((id: number) => contract.getTestimonialDetails(id))
         );
 
-        const formattedTestimonials = details.map((detail: any) => ({
+        const formattedTestimonials = details.map((detail) => ({
           content: detail.content,
           fromAddress: detail.sender,
           timestamp: Number(detail.timestamp),
@@ -75,16 +75,16 @@ function Dashboard() {
     };
 
     fetchTestimonials();
-  }, [address]);
+  }, [address, CONTRACT_ADDRESS]);
 
-  const handleAddTestimonial = async (e: React.FormEvent) => {
+  const handleAddTestimonial = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newTestimonial.trim() || !address) return;
 
     try {
       setIsLoading(true);
       const signedData: SignedTestimonial = JSON.parse(newTestimonial);
-      const ethereum = (window as any).ethereum;
+      const ethereum = window.ethereum;
 
       if (!ethereum) {
         console.error("No Ethereum provider found");
@@ -118,10 +118,10 @@ function Dashboard() {
 
       if (testimonialIds && testimonialIds.length > 0) {
         const details = await Promise.all(
-          testimonialIds.map((id) => contract.getTestimonialDetails(id))
+          testimonialIds.map((id: number) => contract.getTestimonialDetails(id))
         );
 
-        const formattedTestimonials = details.map((detail: any) => ({
+        const formattedTestimonials = details.map((detail) => ({
           content: detail.content,
           fromAddress: detail.sender,
           timestamp: Number(detail.timestamp),

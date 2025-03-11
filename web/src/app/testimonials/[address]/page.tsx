@@ -11,11 +11,13 @@ interface Testimonial {
   verified: boolean;
 }
 
-export default function TestimonialsPage({
-  params,
-}: {
-  params: { address: string };
-}) {
+interface TestimonialsPageProps {
+  params: {
+    address: string;
+  };
+}
+
+export default function TestimonialsPage({ params }: TestimonialsPageProps) {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +25,7 @@ export default function TestimonialsPage({
 
   const CONTRACT_ADDRESS =
     CONTRACT_ADDRESSES[chainId] || CONTRACT_ADDRESSES[534351];
+
   useEffect(() => {
     const fetchTestimonials = async () => {
       if (!params.address) return;

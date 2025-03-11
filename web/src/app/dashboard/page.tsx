@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Copy, CheckCircle } from "lucide-react";
 import { useAccount, useChainId } from "wagmi";
 import { ethers } from "ethers";
-import { CONTRACT_ABI, CONTRACT_ADDRESSES } from "@/utils/contract";
+import { CONTRACT_ADDRESSES, VouchMeFactory } from "@/utils/contract";
 
 interface Testimonial {
   content: string;
@@ -19,7 +19,7 @@ interface SignedTestimonial {
   signature: string;
 }
 
-function Dashboard() {
+export default function Dashboard() {
   const { address } = useAccount();
   const chainId = useChainId();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -32,7 +32,6 @@ function Dashboard() {
 
   const shareableLink = `localhost:3000/write/${address}`;
 
-  // Fetch testimonials using ethers.js
   useEffect(() => {
     const fetchTestimonials = async () => {
       if (!address) return;
@@ -42,13 +41,10 @@ function Dashboard() {
         if (!ethereum) return;
 
         const provider = new ethers.BrowserProvider(ethereum);
-        const contract = new ethers.Contract(
-          CONTRACT_ADDRESS,
-          CONTRACT_ABI,
-          provider
-        );
+        // Use TypeChain factory to create a typed contract instance
+        const contract = VouchMeFactory.connect(CONTRACT_ADDRESS, provider);
 
-        // Get testimonial IDs
+        // Type-safe method call
         const testimonialIds = await contract.getReceivedTestimonials(address);
 
         if (!testimonialIds || testimonialIds.length === 0) {
@@ -56,9 +52,8 @@ function Dashboard() {
           return;
         }
 
-        // Get testimonial details for each ID
         const details = await Promise.all(
-          testimonialIds.map((id: number) => contract.getTestimonialDetails(id))
+          testimonialIds.map((id) => contract.getTestimonialDetails(id))
         );
 
         const formattedTestimonials = details.map((detail) => ({
@@ -92,15 +87,10 @@ function Dashboard() {
       }
 
       const provider = new ethers.BrowserProvider(ethereum);
-      const contract = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        CONTRACT_ABI,
-        provider
-      );
+      const contract = VouchMeFactory.connect(CONTRACT_ADDRESS, provider);
       const signer = await provider.getSigner();
       const contractWithSigner = contract.connect(signer);
 
-      // Call the contract method directly
       const tx = await contractWithSigner.createTestimonial(
         signedData.senderAddress,
         signedData.content,
@@ -118,7 +108,7 @@ function Dashboard() {
 
       if (testimonialIds && testimonialIds.length > 0) {
         const details = await Promise.all(
-          testimonialIds.map((id: number) => contract.getTestimonialDetails(id))
+          testimonialIds.map((id) => contract.getTestimonialDetails(id))
         );
 
         const formattedTestimonials = details.map((detail) => ({
@@ -254,5 +244,3 @@ function Dashboard() {
     </div>
   );
 }
-
-export default Dashboard;

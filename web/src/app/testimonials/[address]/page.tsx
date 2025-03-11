@@ -3,9 +3,8 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useChainId } from "wagmi";
 import { useParams } from "next/navigation";
-import { CONTRACT_ABI, CONTRACT_ADDRESSES } from "@/utils/contract";
+import { CONTRACT_ADDRESSES, VouchMeFactory } from "@/utils/contract";
 
-// Define the testimonial interface
 interface Testimonial {
   content: string;
   fromAddress: string;
@@ -18,8 +17,8 @@ export default function TestimonialsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const chainId = useChainId();
-  const params = useParams(); // Access dynamic route params
-  const address = params?.address as string; // Type assertion for the address param
+  const params = useParams();
+  const address = params?.address as string;
 
   const CONTRACT_ADDRESS =
     CONTRACT_ADDRESSES[chainId] || CONTRACT_ADDRESSES[534351];
@@ -36,11 +35,7 @@ export default function TestimonialsPage() {
         }
 
         const provider = new ethers.BrowserProvider(ethereum);
-        const contract = new ethers.Contract(
-          CONTRACT_ADDRESS,
-          CONTRACT_ABI,
-          provider
-        );
+        const contract = VouchMeFactory.connect(CONTRACT_ADDRESS, provider);
 
         const testimonialIds = await contract.getReceivedTestimonials(address);
 
@@ -50,7 +45,7 @@ export default function TestimonialsPage() {
         }
 
         const details = await Promise.all(
-          testimonialIds.map((id: number) => contract.getTestimonialDetails(id))
+          testimonialIds.map((id) => contract.getTestimonialDetails(id))
         );
 
         const formattedTestimonials = details.map((detail) => ({

@@ -30,7 +30,7 @@ export default function Dashboard() {
   const CONTRACT_ADDRESS =
     CONTRACT_ADDRESSES[chainId] || CONTRACT_ADDRESSES[534351];
 
-  const shareableLink = `localhost:3000/write/${address}`;
+  const shareableLink = `vouch-me.vercel.app/write/${address}`;
 
   useEffect(() => {
     const fetchTestimonials = async () => {

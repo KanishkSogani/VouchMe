@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useChainId } from "wagmi";
-import { CONTRACT_ABI, CONTRACT_ADDRESSES } from "@/utils/contract";
+import { useParams } from "next/navigation";
+import { CONTRACT_ADDRESSES, VouchMeFactory } from "@/utils/contract";
 
 interface Testimonial {
   content: string;
@@ -11,52 +12,43 @@ interface Testimonial {
   verified: boolean;
 }
 
-export default function TestimonialsPage({
-  params,
-}: {
-  params: { address: string };
-}) {
+export default function TestimonialsPage() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const chainId = useChainId();
+  const params = useParams();
+  const address = params?.address as string;
 
   const CONTRACT_ADDRESS =
     CONTRACT_ADDRESSES[chainId] || CONTRACT_ADDRESSES[534351];
+
   useEffect(() => {
     const fetchTestimonials = async () => {
-      if (!params.address) return;
+      if (!address) return;
 
       try {
-        const ethereum = (window as any).ethereum;
+        const ethereum = window.ethereum;
         if (!ethereum) {
           setError("No Ethereum provider found. Please install a wallet.");
           return;
         }
 
         const provider = new ethers.BrowserProvider(ethereum);
-        const contract = new ethers.Contract(
-          CONTRACT_ADDRESS,
-          CONTRACT_ABI,
-          provider
-        );
+        const contract = VouchMeFactory.connect(CONTRACT_ADDRESS, provider);
 
-        // Get testimonial IDs for the address
-        const testimonialIds = await contract.getReceivedTestimonials(
-          params.address
-        );
+        const testimonialIds = await contract.getReceivedTestimonials(address);
 
         if (!testimonialIds || testimonialIds.length === 0) {
           setTestimonials([]);
           return;
         }
 
-        // Get testimonial details for each ID
         const details = await Promise.all(
           testimonialIds.map((id) => contract.getTestimonialDetails(id))
         );
 
-        const formattedTestimonials = details.map((detail: any) => ({
+        const formattedTestimonials = details.map((detail) => ({
           content: detail.content,
           fromAddress: detail.sender,
           timestamp: Number(detail.timestamp),
@@ -73,14 +65,12 @@ export default function TestimonialsPage({
     };
 
     fetchTestimonials();
-  }, [params.address]);
+  }, [address, CONTRACT_ADDRESS]);
 
-  // Function to format timestamp
   const formatDate = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleDateString();
   };
 
-  // Function to truncate address
   const truncateAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
@@ -116,7 +106,7 @@ export default function TestimonialsPage({
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold mb-4">Public Testimonials</h1>
           <p className="text-gray-400">
-            Viewing testimonials for {truncateAddress(params.address)}
+            Viewing testimonials for {truncateAddress(address)}
           </p>
           <div className="mt-2 text-sm">
             <span className="bg-indigo-600/20 text-indigo-400 px-3 py-1 rounded-full">

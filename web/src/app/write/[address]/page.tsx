@@ -1,21 +1,23 @@
 "use client";
 import { useState } from "react";
 import { useAccount } from "wagmi";
+import { useParams } from "next/navigation";
 import { keccak256, encodePacked } from "viem";
 
-export default function WritePage({ params }: { params: { address: string } }) {
+export default function WritePage() {
   const { address: connectedAddress } = useAccount();
   const [content, setContent] = useState("");
   const [signedMessage, setSignedMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const params = useParams();
+  const receiverAddress = params?.address as `0x${string}`;
 
   const handleCreateSignedMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim() || !connectedAddress) return;
+    if (!content.trim() || !connectedAddress || !receiverAddress) return;
 
     try {
       setIsLoading(true);
-      const receiverAddress = params.address as `0x${string}`;
       const senderAddress = connectedAddress;
 
       // Create message hash matching the smart contract's format
@@ -27,8 +29,11 @@ export default function WritePage({ params }: { params: { address: string } }) {
       );
 
       // Sign the message directly with personal_sign
+      const ethereum = window.ethereum;
+      if (!ethereum) {
+        throw new Error("No Ethereum provider found");
+      }
 
-      const ethereum = (window as any).ethereum;
       const signature = await ethereum.request({
         method: "personal_sign",
         params: [messageHash, senderAddress],

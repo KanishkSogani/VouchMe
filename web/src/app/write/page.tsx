@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
-import { useParams } from "next/navigation";
 import { keccak256, encodePacked } from "viem";
 
 export default function WritePage() {
@@ -9,8 +9,25 @@ export default function WritePage() {
   const [content, setContent] = useState("");
   const [signedMessage, setSignedMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const params = useParams();
-  const receiverAddress = params?.address as `0x${string}`;
+  const [receiverAddress, setReceiverAddress] = useState<`0x${string}` | null>(
+    null
+  );
+  const [error, setError] = useState<string | null>(null);
+
+  // Extract address from query string
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const addressFromQuery = urlParams.get("address");
+
+    if (addressFromQuery && addressFromQuery.startsWith("0x")) {
+      setReceiverAddress(addressFromQuery as `0x${string}`);
+    } else {
+      setError(
+        "Invalid or missing Ethereum address in URL query parameter 'address'"
+      );
+      setIsLoading(false);
+    }
+  }, []);
 
   const handleCreateSignedMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,10 +67,23 @@ export default function WritePage() {
       setContent("");
     } catch (error) {
       console.error("Error creating signed message:", error);
+      setError("Failed to create signed message. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#1a1a1a] text-white py-8">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-center">
+            <p className="text-red-400">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#1a1a1a] text-white py-6">
@@ -69,7 +99,7 @@ export default function WritePage() {
           <button
             type="submit"
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:bg-indigo-400"
-            disabled={!connectedAddress || isLoading}
+            disabled={!connectedAddress || isLoading || !receiverAddress}
           >
             {isLoading ? "Signing..." : "Sign Testimonial"}
           </button>

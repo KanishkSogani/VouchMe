@@ -1,8 +1,8 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useChainId } from "wagmi";
-import { useParams } from "next/navigation";
 import { CONTRACT_ADDRESSES, VouchMeFactory } from "@/utils/contract";
 
 interface Testimonial {
@@ -17,11 +17,25 @@ export default function TestimonialsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const chainId = useChainId();
-  const params = useParams();
-  const address = params?.address as string;
+  const [address, setAddress] = useState<`0x${string}` | null>(null);
 
   const CONTRACT_ADDRESS =
     CONTRACT_ADDRESSES[chainId] || CONTRACT_ADDRESSES[534351];
+
+  // Extract address from query string
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const addressFromQuery = urlParams.get("address");
+
+    if (addressFromQuery && addressFromQuery.startsWith("0x")) {
+      setAddress(addressFromQuery as `0x${string}`);
+    } else {
+      setError(
+        "Invalid or missing Ethereum address in URL query parameter 'address'"
+      );
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchTestimonials = async () => {
@@ -106,7 +120,8 @@ export default function TestimonialsPage() {
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold mb-4">Public Testimonials</h1>
           <p className="text-gray-400">
-            Viewing testimonials for {truncateAddress(address)}
+            Viewing testimonials for{" "}
+            {address ? truncateAddress(address) : "unknown address"}
           </p>
           <div className="mt-2 text-sm">
             <span className="bg-indigo-600/20 text-indigo-400 px-3 py-1 rounded-full">

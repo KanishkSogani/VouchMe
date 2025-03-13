@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useChainId } from "wagmi";
-import { useParams } from "next/navigation";
 import { CONTRACT_ADDRESSES, VouchMeFactory } from "@/utils/contract";
 
 interface Testimonial {
@@ -13,16 +12,42 @@ interface Testimonial {
   verified: boolean;
 }
 
-export default function TestimonialsClient() {
+export default function TestimonialsPage() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const chainId = useChainId();
-  const params = useParams();
-  const address = params?.address as string;
+  const [address, setAddress] = useState<`0x${string}` | null>(null);
 
   const CONTRACT_ADDRESS =
     CONTRACT_ADDRESSES[chainId] || CONTRACT_ADDRESSES[534351];
+
+  // Extract address from URL path or hash
+  useEffect(() => {
+    // First, try parsing from the hash (from 404.html redirect)
+    const hash = window.location.hash
+      ? decodeURIComponent(window.location.hash.substring(1))
+      : "";
+    let pathToParse = window.location.pathname;
+
+    if (hash) {
+      pathToParse = hash; // Use the hash if present (e.g., "/testimonials/0x...")
+    }
+
+    const pathParts = pathToParse.split("/").filter((part) => part);
+    const basePathIndex = pathParts.indexOf("testimonials");
+    const addressFromPath =
+      basePathIndex !== -1 && basePathIndex + 1 < pathParts.length
+        ? pathParts[basePathIndex + 1]
+        : null;
+
+    if (addressFromPath && addressFromPath.startsWith("0x")) {
+      setAddress(addressFromPath as `0x${string}`);
+    } else {
+      setError("Invalid or missing Ethereum address in URL");
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchTestimonials = async () => {
@@ -107,7 +132,8 @@ export default function TestimonialsClient() {
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold mb-4">Public Testimonials</h1>
           <p className="text-gray-400">
-            Viewing testimonials for {truncateAddress(address)}
+            Viewing testimonials for{" "}
+            {address ? truncateAddress(address) : "unknown address"}
           </p>
           <div className="mt-2 text-sm">
             <span className="bg-indigo-600/20 text-indigo-400 px-3 py-1 rounded-full">

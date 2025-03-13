@@ -1,4 +1,5 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import { Highlight } from "../ui/hero-highlight";
 import { useAccount } from "wagmi";
@@ -28,8 +29,15 @@ const HeroSection = () => {
         </button>
 
         <button
-          onClick={() => router.push(`/testimonials/${address}`)}
-          className="px-8 py-3 bg-transparent hover:bg-gray-800 text-white border border-gray-600 rounded-lg font-medium transition-colors"
+          onClick={() =>
+            address
+              ? router.push(`/testimonials?address=${address}`)
+              : alert("Please connect your wallet to view your showcase.")
+          }
+          disabled={!address}
+          className={`px-8 py-3 bg-transparent text-white border border-gray-600 rounded-lg font-medium transition-colors ${
+            address ? "hover:bg-gray-800" : "opacity-50 cursor-not-allowed"
+          }`}
         >
           View Showcase
         </button>

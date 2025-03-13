@@ -22,29 +22,17 @@ export default function TestimonialsPage() {
   const CONTRACT_ADDRESS =
     CONTRACT_ADDRESSES[chainId] || CONTRACT_ADDRESSES[534351];
 
-  // Extract address from URL path or hash
+  // Extract address from query string
   useEffect(() => {
-    // First, try parsing from the hash (from 404.html redirect)
-    const hash = window.location.hash
-      ? decodeURIComponent(window.location.hash.substring(1))
-      : "";
-    let pathToParse = window.location.pathname;
+    const urlParams = new URLSearchParams(window.location.search);
+    const addressFromQuery = urlParams.get("address");
 
-    if (hash) {
-      pathToParse = hash; // Use the hash if present (e.g., "/testimonials/0x...")
-    }
-
-    const pathParts = pathToParse.split("/").filter((part) => part);
-    const basePathIndex = pathParts.indexOf("testimonials");
-    const addressFromPath =
-      basePathIndex !== -1 && basePathIndex + 1 < pathParts.length
-        ? pathParts[basePathIndex + 1]
-        : null;
-
-    if (addressFromPath && addressFromPath.startsWith("0x")) {
-      setAddress(addressFromPath as `0x${string}`);
+    if (addressFromQuery && addressFromQuery.startsWith("0x")) {
+      setAddress(addressFromQuery as `0x${string}`);
     } else {
-      setError("Invalid or missing Ethereum address in URL");
+      setError(
+        "Invalid or missing Ethereum address in URL query parameter 'address'"
+      );
       setIsLoading(false);
     }
   }, []);

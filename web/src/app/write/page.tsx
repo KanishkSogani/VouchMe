@@ -14,27 +14,17 @@ export default function WritePage() {
   );
   const [error, setError] = useState<string | null>(null);
 
-  // Extract address from URL path or hash
+  // Extract address from query string
   useEffect(() => {
-    const hash = window.location.hash
-      ? decodeURIComponent(window.location.hash.substring(1))
-      : "";
-    let pathToParse = window.location.pathname;
+    const urlParams = new URLSearchParams(window.location.search);
+    const addressFromQuery = urlParams.get("address");
 
-    if (hash) {
-      pathToParse = hash;
-    }
-
-    const pathParts = pathToParse.split("/").filter((part) => part);
-    const basePathIndex = pathParts.indexOf("write");
-    const addressFromPath =
-      basePathIndex !== -1 && basePathIndex + 1 < pathParts.length
-        ? pathParts[basePathIndex + 1]
-        : null;
-    if (addressFromPath && addressFromPath.startsWith("0x")) {
-      setReceiverAddress(addressFromPath as `0x${string}`);
+    if (addressFromQuery && addressFromQuery.startsWith("0x")) {
+      setReceiverAddress(addressFromQuery as `0x${string}`);
     } else {
-      setError("Invalid or missing Ethereum address in URL");
+      setError(
+        "Invalid or missing Ethereum address in URL query parameter 'address'"
+      );
       setIsLoading(false);
     }
   }, []);

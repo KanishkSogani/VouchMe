@@ -1,7 +1,11 @@
+"use client";
 import { Plus, Files, CheckCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 
 const HowItWorks = () => {
+  const router = useRouter();
+
   const steps = [
     {
       number: "1",
@@ -10,7 +14,10 @@ const HowItWorks = () => {
       description:
         "Set up your personalized testimonial collection page with your address.",
       additionalContent: (
-        <div className="mt-4 bg-[#404040] rounded p-3">
+        <div
+          className="mt-4 bg-[#404040] rounded p-3 cursor-pointer"
+          onClick={() => router.push("/dashboard")}
+        >
           <code className="text-gray-400">vouch.me/[your-address]</code>
         </div>
       ),
@@ -61,15 +68,25 @@ const HowItWorks = () => {
             Follow these simple steps to start collecting and showcasing
             verified testimonials
           </p>
-        </div>
-
+        </div>{" "}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           {steps.map((step, index) => (
-            <div key={index} className="relative">
+            <div
+              key={index}
+              className="relative"
+              onClick={
+                index === 0 ? () => router.push("/dashboard") : undefined
+              }
+              style={index === 0 ? { cursor: "pointer" } : {}}
+            >
               <div className="absolute -left-4 -top-4 w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">
                 {step.number}
               </div>
-              <Card className="bg-[#262626] border-gray-800 h-full">
+              <Card
+                className={`bg-[#262626] border-gray-800 h-full ${
+                  index === 0 ? "hover:bg-[#2c2c2c] transition-colors" : ""
+                }`}
+              >
                 <CardContent className="p-6">
                   <div className="mb-6">
                     <div className="bg-indigo-600 w-12 h-12 rounded-lg flex items-center justify-center">
@@ -86,9 +103,11 @@ const HowItWorks = () => {
             </div>
           ))}
         </div>
-
         <div className="text-center">
-          <button className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg  transition-colors font-bold">
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg  transition-colors font-bold"
+          >
             Start Your Collection Now
           </button>
         </div>

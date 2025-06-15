@@ -4,6 +4,7 @@ import { Copy, CheckCircle, Loader2, Database } from "lucide-react";
 import { useAccount, useChainId } from "wagmi";
 import { ethers } from "ethers";
 import { CONTRACT_ADDRESSES, VouchMeFactory } from "@/utils/contract";
+import { useToast } from "@/hooks/useToast";
 
 interface Testimonial {
   content: string;
@@ -22,6 +23,7 @@ interface SignedTestimonial {
 export default function Dashboard() {
   const { address } = useAccount();
   const chainId = useChainId();
+  const { showSuccess, showError } = useToast();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [newTestimonial, setNewTestimonial] = useState("");
   const [copied, setCopied] = useState(false);
@@ -39,7 +41,6 @@ export default function Dashboard() {
   }, []);
 
   const shareableLink = `${baseUrl}/write?address=${address}`;
-
   useEffect(() => {
     const fetchTestimonials = async () => {
       if (!address) return;
@@ -71,29 +72,43 @@ export default function Dashboard() {
           timestamp: Number(detail.timestamp),
           verified: detail.verified,
         }));
-
         setTestimonials(formattedTestimonials);
+        // Only show success toast if testimonials are actually loaded
+        if (formattedTestimonials.length > 0) {
+          showSuccess(
+            `Successfully loaded ${formattedTestimonials.length} testimonials`
+          );
+        }
       } catch (error) {
         console.error("Error fetching testimonials:", error);
+        showError("Failed to fetch testimonials");
       } finally {
         setIsFetchingTestimonials(false);
       }
     };
 
     fetchTestimonials();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, CONTRACT_ADDRESS]);
 
   const handleAddTestimonial = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newTestimonial.trim() || !address) return;
-
     try {
       setIsLoading(true);
-      const signedData: SignedTestimonial = JSON.parse(newTestimonial);
+      let signedData: SignedTestimonial;
+      try {
+        signedData = JSON.parse(newTestimonial);
+      } catch {
+        showError("Invalid testimonial format. Please paste a valid JSON.");
+        setIsLoading(false);
+        return;
+      }
       const ethereum = window.ethereum;
 
       if (!ethereum) {
         console.error("No Ethereum provider found");
+        showError("No Ethereum provider found. Please install a wallet.");
         return;
       }
 
@@ -109,10 +124,10 @@ export default function Dashboard() {
       );
 
       console.log("Transaction sent:", tx.hash);
-      setNewTestimonial("");
 
-      // Wait for transaction confirmation
+      setNewTestimonial(""); // Wait for transaction confirmation
       await tx.wait();
+      showSuccess("Testimonial added successfully.");
 
       // Refresh testimonials
       const testimonialIds = await contract.getReceivedTestimonials(address);
@@ -133,6 +148,7 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error("Error adding testimonial:", error);
+      showError("Error adding testimonial. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -144,10 +160,10 @@ export default function Dashboard() {
     if (text.length <= startLength + endLength) return text;
     return `${text.slice(0, startLength)}...${text.slice(-endLength)}`;
   };
-
   const copyLink = () => {
     navigator.clipboard.writeText(shareableLink);
     setCopied(true);
+    showSuccess("Link copied to clipboard!");
     setTimeout(() => setCopied(false), 2000);
   };
 

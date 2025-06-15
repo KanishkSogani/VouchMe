@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { WalletProvider } from "@/hooks/WalletProvider";
 import ProtectedRouteProvider from "@/hooks/ProtectedRouteProvider";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,9 +34,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {" "}
         <WalletProvider>
           <ProtectedRouteProvider>{children}</ProtectedRouteProvider>
         </WalletProvider>
+        <Toaster position="top-center" />
       </body>
     </html>
   );

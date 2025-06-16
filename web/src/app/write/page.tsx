@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 import { keccak256, encodePacked } from "viem";
+import { useToast } from "@/hooks/useToast";
 
 export default function WritePage() {
   const { address: connectedAddress } = useAccount();
+  const { showSuccess, showError } = useToast();
   const [content, setContent] = useState("");
   const [signedMessage, setSignedMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -18,16 +20,16 @@ export default function WritePage() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const addressFromQuery = urlParams.get("address");
-
     if (addressFromQuery && addressFromQuery.startsWith("0x")) {
       setReceiverAddress(addressFromQuery as `0x${string}`);
     } else {
-      setError(
-        "Invalid or missing Ethereum address in URL query parameter 'address'"
-      );
+      const errorMessage =
+        "Invalid or missing Ethereum address in URL query parameter 'address'";
+      setError(errorMessage);
+      showError(errorMessage);
       setIsLoading(false);
     }
-  }, []);
+  }, [showError]);
 
   const handleCreateSignedMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,12 +45,13 @@ export default function WritePage() {
           ["address", "address", "string"],
           [senderAddress, receiverAddress, content]
         )
-      );
-
-      // Sign the message directly with personal_sign
+      ); // Sign the message directly with personal_sign
       const ethereum = window.ethereum;
       if (!ethereum) {
-        throw new Error("No Ethereum provider found");
+        const errorMessage =
+          "No Ethereum provider found. Please install a wallet.";
+        showError(errorMessage);
+        throw new Error(errorMessage);
       }
 
       const signature = await ethereum.request({
@@ -62,12 +65,17 @@ export default function WritePage() {
         content,
         signature,
       };
-
       setSignedMessage(JSON.stringify(signedMessageJson, null, 2));
       setContent("");
+      showSuccess("Testimonial signed successfully!");
     } catch (error) {
       console.error("Error creating signed message:", error);
-      setError("Failed to create signed message. Please try again.");
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to create signed message. Please try again.";
+      setError(errorMessage);
+      showError(errorMessage);
     } finally {
       setIsLoading(false);
     }

@@ -163,7 +163,6 @@ export default function Dashboard() {
   const copyLink = () => {
     navigator.clipboard.writeText(shareableLink);
     setCopied(true);
-    showSuccess("Link copied to clipboard!");
     setTimeout(() => setCopied(false), 2000);
   };
 

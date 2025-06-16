@@ -1,7 +1,12 @@
+"use client";
+
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 
 const TestimonialsSection = () => {
+  const router = useRouter();
+
   const testimonials = [
     {
       name: "John Doe",
@@ -27,14 +32,17 @@ const TestimonialsSection = () => {
           <div className="space-y-6">
             <h1 className="text-3xl md:text-5xl font-bold">
               Decentralized Testimonials for the Digital Age
-            </h1>
+            </h1>{" "}
             <p className="text-gray-300 text-lg md:text-xl">
               Leverage blockchain technology to collect, verify, and showcase
               authentic testimonials. Build trust with your audience through
               transparent and immutable proof of satisfaction.
             </p>
             <div>
-              <button className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg  transition-colors font-bold">
+              <button
+                onClick={() => router.push("/dashboard")}
+                className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-bold"
+              >
                 Create Collection
               </button>
             </div>

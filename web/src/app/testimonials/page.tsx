@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useChainId } from "wagmi";
 import { CONTRACT_ADDRESSES, VouchMeFactory } from "@/utils/contract";
+import { useToast } from "@/hooks/useToast";
 
 interface Testimonial {
   content: string;
@@ -18,6 +19,7 @@ export default function TestimonialsPage() {
   const [error, setError] = useState<string | null>(null);
   const chainId = useChainId();
   const [address, setAddress] = useState<`0x${string}` | null>(null);
+  const { showSuccess, showError } = useToast();
 
   const CONTRACT_ADDRESS =
     CONTRACT_ADDRESSES[chainId] || CONTRACT_ADDRESSES[534351];
@@ -25,26 +27,25 @@ export default function TestimonialsPage() {
   // Extract address from query string
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const addressFromQuery = urlParams.get("address");
-
-    if (addressFromQuery && addressFromQuery.startsWith("0x")) {
+    const addressFromQuery = urlParams.get("address");    if (addressFromQuery && addressFromQuery.startsWith("0x")) {
       setAddress(addressFromQuery as `0x${string}`);
     } else {
-      setError(
-        "Invalid or missing Ethereum address in URL query parameter 'address'"
-      );
+      const errorMessage = "Invalid or missing Ethereum address in URL query parameter 'address'";
+      setError(errorMessage);
+      showError(errorMessage);
       setIsLoading(false);
     }
-  }, []);
+  }, [showError]);
 
   useEffect(() => {
     const fetchTestimonials = async () => {
       if (!address) return;
 
-      try {
-        const ethereum = window.ethereum;
+      try {        const ethereum = window.ethereum;
         if (!ethereum) {
-          setError("No Ethereum provider found. Please install a wallet.");
+          const errorMessage = "No Ethereum provider found. Please install a wallet.";
+          setError(errorMessage);
+          showError(errorMessage);
           return;
         }
 
@@ -67,18 +68,18 @@ export default function TestimonialsPage() {
           fromAddress: detail.sender,
           timestamp: Number(detail.timestamp),
           verified: detail.verified,
-        }));
-
-        setTestimonials(formattedTestimonials);
+        }));        setTestimonials(formattedTestimonials);
+        showSuccess(`Successfully loaded ${formattedTestimonials.length} testimonials`);
       } catch (error) {
         console.error("Error fetching testimonials:", error);
-        setError("Failed to fetch testimonials. Please try again later.");
+        const errorMessage = "Failed to fetch testimonials. Please try again later.";
+        setError(errorMessage);
+        showError(errorMessage);
       } finally {
         setIsLoading(false);
       }
-    };
-
-    fetchTestimonials();
+    };    fetchTestimonials();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, CONTRACT_ADDRESS]);
 
   const formatDate = (timestamp: number) => {

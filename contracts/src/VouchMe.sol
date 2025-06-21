@@ -27,11 +27,12 @@ contract VouchMe is ERC721URIStorage {
         string contact;
         string bio;
     }
-    
-    struct Testimonial {
+      struct Testimonial {
         address sender;
         address receiver;
         string content;
+        string giverName;   
+        string profileUrl;    
         uint256 timestamp;
         bool verified;
         bool isDeleted;
@@ -43,26 +44,29 @@ contract VouchMe is ERC721URIStorage {
     event TestimonialUpdated(address sender, address receiver, uint256 newTokenId);
     event ProfileUpdated(address user);
     
-    constructor() ERC721("VouchMe Testimonial", "VOUCH") {}
-
-    /**
+    constructor() ERC721("VouchMe Testimonial", "VOUCH") {}    /**
      * @dev Creates a testimonial NFT based on a signed message
      * @param senderAddress Address of the sender who created the testimonial
      * @param content The testimonial content
+     * @param giverName Full name of the person giving the testimonial
+     * @param profileUrl Optional LinkedIn or GitHub profile URL (can be empty)
      * @param signature Signature of the testimonial data
      * @return tokenId The ID of the newly created testimonial NFT
      */
     function createTestimonial(
         address senderAddress, 
-        string calldata content, 
+        string calldata content,
+        string calldata giverName,
+        string calldata profileUrl,
         bytes calldata signature
-    ) external returns (uint256) {
-        // Hash the message that was signed
+    ) external returns (uint256) {        // Hash the message that was signed
         bytes32 messageHash = keccak256(
             abi.encodePacked(
                 senderAddress,
                 msg.sender, // receiver
-                content
+                content,
+                giverName,
+                profileUrl
             )
         );
         
@@ -93,12 +97,13 @@ contract VouchMe is ERC721URIStorage {
 
         // Mint the NFT to the receiver
         _mint(msg.sender, newTokenId);
-        
-        // Store the testimonial details
+          // Store the testimonial details
         _testimonials[newTokenId] = Testimonial({
             sender: senderAddress,
             receiver: msg.sender,
             content: content,
+            giverName: giverName,
+            profileUrl: profileUrl,
             timestamp: block.timestamp,
             verified: true,
             isDeleted: false
@@ -157,13 +162,14 @@ contract VouchMe is ERC721URIStorage {
      */
     function generateTokenURI(uint256 tokenId) internal view returns (string memory) {
         Testimonial memory testimonial = _testimonials[tokenId];
-        
-        return string(
+          return string(
             abi.encodePacked(
                 '{"tokenId":"', tokenId.toString(),
                 '","sender":"', addressToString(testimonial.sender),
                 '","receiver":"', addressToString(testimonial.receiver),                
                 '","content":"', testimonial.content,
+                '","giverName":"', testimonial.giverName,
+                '","profileUrl":"', testimonial.profileUrl,
                 '","timestamp":"', uint256(testimonial.timestamp).toString(),
                 '","verified":"', testimonial.verified ? "true" : "false",
                 '","isDeleted":"', testimonial.isDeleted ? "true" : "false",

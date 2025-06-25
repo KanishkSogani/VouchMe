@@ -35,12 +35,11 @@ contract VouchMe is ERC721URIStorage {
         string profileUrl;    
         uint256 timestamp;
         bool verified;
-        bool isDeleted;
     }
     
     event TestimonialCreated(uint256 tokenId, address sender, address receiver);
     event TestimonialVerified(uint256 tokenId, address receiver);
-    event TestimonialRemoved(uint256 tokenId, address receiver);
+    event TestimonialDeleted(uint256 tokenId, address receiver);
     event TestimonialUpdated(address sender, address receiver, uint256 newTokenId);
     event ProfileUpdated(address user);
     
@@ -78,19 +77,8 @@ contract VouchMe is ERC721URIStorage {
         // Check if there's an existing active testimonial from this sender to this receiver
         uint256 existingTokenId = _activeTestimonial[senderAddress][msg.sender];
         if (existingTokenId != 0) {
-            // Soft delete the existing testimonial
-            _testimonials[existingTokenId].isDeleted = true;
-            
-            // Remove it from the receiver's list
-            uint256[] storage testimonials = _receivedTestimonials[msg.sender];
-            for (uint256 i = 0; i < testimonials.length; i++) {
-                if (testimonials[i] == existingTokenId) {
-                    // Swap with the last element and pop
-                    testimonials[i] = testimonials[testimonials.length - 1];
-                    testimonials.pop();
-                    break;
-                }
-            }
+            // Remove the existing testimonial from active list
+            _removeTestimonialFromActiveList(existingTokenId, senderAddress, msg.sender);
         }
 
         uint256 newTokenId = ++_tokenIdTracker; // Manually increment token ID
@@ -105,8 +93,7 @@ contract VouchMe is ERC721URIStorage {
             giverName: giverName,
             profileUrl: profileUrl,
             timestamp: block.timestamp,
-            verified: true,
-            isDeleted: false
+            verified: true
         });
           // Add to receiver's testimonials
         _receivedTestimonials[msg.sender].push(newTokenId);
@@ -142,7 +129,12 @@ contract VouchMe is ERC721URIStorage {
      */
     function getTestimonialDetails(uint256 tokenId) external view returns (Testimonial memory) {
         require(_ownerOf(tokenId) != address(0), "Testimonial does not exist");
-        require(!_testimonials[tokenId].isDeleted, "Testimonial has been deleted");
+        
+        // Check if the testimonial is in the active list
+        address sender = _testimonials[tokenId].sender;
+        address receiver = _testimonials[tokenId].receiver;
+        require(_activeTestimonial[sender][receiver] == tokenId, "Testimonial has been deleted");
+        
         return _testimonials[tokenId];
     }
 
@@ -172,7 +164,6 @@ contract VouchMe is ERC721URIStorage {
                 '","profileUrl":"', testimonial.profileUrl,
                 '","timestamp":"', uint256(testimonial.timestamp).toString(),
                 '","verified":"', testimonial.verified ? "true" : "false",
-                '","isDeleted":"', testimonial.isDeleted ? "true" : "false",
                 '"}'
             )
         );
@@ -223,23 +214,17 @@ contract VouchMe is ERC721URIStorage {
     }
     
     /**
-     * @dev Removes a testimonial (soft delete)
+     * @dev Internal helper function to remove a testimonial from the active list
      * @param tokenId The token ID to remove
+     * @param sender The sender of the testimonial
+     * @param receiver The receiver of the testimonial
      */
-    function removeTestimonial(uint256 tokenId) external {
-        require(_ownerOf(tokenId) == msg.sender, "Only recipient can remove");
-        require(!_testimonials[tokenId].isDeleted, "Testimonial already deleted");
+    function _removeTestimonialFromActiveList(uint256 tokenId, address sender, address receiver) internal {
+        // Delete from active testimonial mapping
+        delete _activeTestimonial[sender][receiver];
         
-        _testimonials[tokenId].isDeleted = true;
-        
-        // Remove from active testimonial mapping
-        address sender = _testimonials[tokenId].sender;
-        if (_activeTestimonial[sender][msg.sender] == tokenId) {
-            delete _activeTestimonial[sender][msg.sender];
-        }
-        
-        // Remove from received testimonials array
-        uint256[] storage testimonials = _receivedTestimonials[msg.sender];
+        // Delete from received testimonials array
+        uint256[] storage testimonials = _receivedTestimonials[receiver];
         for (uint256 i = 0; i < testimonials.length; i++) {
             if (testimonials[i] == tokenId) {
                 // Swap with the last element and pop
@@ -248,7 +233,21 @@ contract VouchMe is ERC721URIStorage {
                 break;
             }
         }
+    }
+    
+    /**
+     * @dev Deletes a testimonial
+     * @param tokenId The token ID to delete
+     */
+    function deleteTestimonial(uint256 tokenId) external {
+        require(_ownerOf(tokenId) == msg.sender, "Only recipient can delete");
         
-        emit TestimonialRemoved(tokenId, msg.sender);
+        // Check if the testimonial is still active
+        address sender = _testimonials[tokenId].sender;
+        require(_activeTestimonial[sender][msg.sender] == tokenId, "Testimonial already deleted");
+        
+        _removeTestimonialFromActiveList(tokenId, sender, msg.sender);
+        
+        emit TestimonialDeleted(tokenId, msg.sender);
     }
 }

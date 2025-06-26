@@ -8,78 +8,113 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract VouchMe is ERC721URIStorage {
     using ECDSA for bytes32;
-    using Strings for uint256;
-
+    using Strings for uint256;    
     uint256 private _tokenIdTracker; // Manually track token IDs
 
     // Maps user address to their received testimonial token IDs
     mapping(address => uint256[]) private _receivedTestimonials;
     
+    // Maps token ID to its index in the receiver's testimonials array
+    mapping(uint256 => uint256) private _testimonialIndexInArray;
+    
     // Maps token ID to testimonial details
     mapping(uint256 => Testimonial) private _testimonials;
     
-    struct Testimonial {
+    // Maps sender to receiver to their active testimonial (for one-per-pair rule)
+    mapping(address => mapping(address => uint256)) private _activeTestimonial;
+    
+    // Maps user address to their profile data
+    mapping(address => Profile) public userProfiles;    
+    struct Profile {
+        string name;
+        string contact;
+        string bio;
+    }
+      struct Testimonial {
         address sender;
         address receiver;
         string content;
+        string giverName;   
+        string profileUrl;    
         uint256 timestamp;
         bool verified;
     }
     
     event TestimonialCreated(uint256 tokenId, address sender, address receiver);
     event TestimonialVerified(uint256 tokenId, address receiver);
+    event TestimonialDeleted(uint256 tokenId, address receiver);
+    event TestimonialUpdated(address sender, address receiver, uint256 newTokenId);
+    event ProfileUpdated(address user);
     
-    constructor() ERC721("VouchMe Testimonial", "VOUCH") {}
-
-    /**
+    constructor() ERC721("VouchMe Testimonial", "VOUCH") {}    /**
      * @dev Creates a testimonial NFT based on a signed message
      * @param senderAddress Address of the sender who created the testimonial
      * @param content The testimonial content
+     * @param giverName Full name of the person giving the testimonial
+     * @param profileUrl Optional LinkedIn or GitHub profile URL (can be empty)
      * @param signature Signature of the testimonial data
      * @return tokenId The ID of the newly created testimonial NFT
      */
     function createTestimonial(
         address senderAddress, 
-        string calldata content, 
+        string calldata content,
+        string calldata giverName,
+        string calldata profileUrl,
         bytes calldata signature
-    ) external returns (uint256) {
-        // Hash the message that was signed
+    ) external returns (uint256) {        // Hash the message that was signed
         bytes32 messageHash = keccak256(
             abi.encodePacked(
                 senderAddress,
                 msg.sender, // receiver
-                content
+                content,
+                giverName,
+                profileUrl
             )
         );
         
         bytes32 ethSignedMessageHash = MessageHashUtils.toEthSignedMessageHash(messageHash);
-        
-        // Verify the signature matches the sender
+          // Verify the signature matches the sender
         address recoveredSigner = ethSignedMessageHash.recover(signature);
         require(recoveredSigner == senderAddress, "Invalid signature");
+
+        // Check if there's an existing active testimonial from this sender to this receiver
+        uint256 existingTokenId = _activeTestimonial[senderAddress][msg.sender];
+        if (existingTokenId != 0) {
+            // Remove the existing testimonial from active list
+            _removeTestimonialFromActiveList(existingTokenId, senderAddress, msg.sender);
+        }
 
         uint256 newTokenId = ++_tokenIdTracker; // Manually increment token ID
 
         // Mint the NFT to the receiver
         _mint(msg.sender, newTokenId);
-        
-        // Store the testimonial details
+          // Store the testimonial details
         _testimonials[newTokenId] = Testimonial({
             sender: senderAddress,
             receiver: msg.sender,
             content: content,
+            giverName: giverName,
+            profileUrl: profileUrl,
             timestamp: block.timestamp,
             verified: true
         });
-        
-        // Add to receiver's testimonials
+          // Add to receiver's testimonials
+        uint256 newIndex = _receivedTestimonials[msg.sender].length;
         _receivedTestimonials[msg.sender].push(newTokenId);
+        _testimonialIndexInArray[newTokenId] = newIndex;
+        
+        // Update active testimonial mapping
+        _activeTestimonial[senderAddress][msg.sender] = newTokenId;
         
         // Generate token URI
         string memory tokenURI = generateTokenURI(newTokenId);
         _setTokenURI(newTokenId, tokenURI);
+          emit TestimonialCreated(newTokenId, senderAddress, msg.sender);
         
-        emit TestimonialCreated(newTokenId, senderAddress, msg.sender);
+        // If we replaced an existing testimonial, emit the update event
+        if (existingTokenId != 0) {
+            emit TestimonialUpdated(senderAddress, msg.sender, newTokenId);
+        }
         
         return newTokenId;
     }
@@ -92,14 +127,19 @@ contract VouchMe is ERC721URIStorage {
     function getReceivedTestimonials(address receiver) external view returns (uint256[] memory) {
         return _receivedTestimonials[receiver];
     }
-    
-    /**
+      /**
      * @dev Gets details of a specific testimonial
      * @param tokenId The token ID of the testimonial
      * @return Testimonial struct containing details
      */
     function getTestimonialDetails(uint256 tokenId) external view returns (Testimonial memory) {
         require(_ownerOf(tokenId) != address(0), "Testimonial does not exist");
+        
+        // Check if the testimonial is in the active list
+        address sender = _testimonials[tokenId].sender;
+        address receiver = _testimonials[tokenId].receiver;
+        require(_activeTestimonial[sender][receiver] == tokenId, "Testimonial has been deleted");
+        
         return _testimonials[tokenId];
     }
 
@@ -119,13 +159,14 @@ contract VouchMe is ERC721URIStorage {
      */
     function generateTokenURI(uint256 tokenId) internal view returns (string memory) {
         Testimonial memory testimonial = _testimonials[tokenId];
-        
-        return string(
+          return string(
             abi.encodePacked(
                 '{"tokenId":"', tokenId.toString(),
                 '","sender":"', addressToString(testimonial.sender),
-                '","receiver":"', addressToString(testimonial.receiver),
+                '","receiver":"', addressToString(testimonial.receiver),                
                 '","content":"', testimonial.content,
+                '","giverName":"', testimonial.giverName,
+                '","profileUrl":"', testimonial.profileUrl,
                 '","timestamp":"', uint256(testimonial.timestamp).toString(),
                 '","verified":"', testimonial.verified ? "true" : "false",
                 '"}'
@@ -147,5 +188,78 @@ contract VouchMe is ERC721URIStorage {
      */
     function addressToString(address _address) internal pure returns (string memory) {
         return Strings.toHexString(uint256(uint160(_address)), 20);
+    }    /**
+     * @dev Sets or updates a user's profile information
+     * @param name The user's name
+     * @param contact The user's contact information
+     * @param bio The user's biography
+     */    function setProfile(
+        string calldata name,
+        string calldata contact,
+        string calldata bio    ) external {        userProfiles[msg.sender] = Profile({
+            name: name,
+            contact: contact,
+            bio: bio
+        });
+        
+        emit ProfileUpdated(msg.sender);
+    }
+    
+    /**
+     * @dev Checks if an active testimonial already exists from a sender to a receiver
+     * @param sender The address of the sender
+     * @param receiver The address of the receiver
+     * @return exists Whether an active testimonial exists
+     * @return tokenId The token ID of the existing testimonial (0 if none exists)
+     */
+    function hasExistingTestimonial(address sender, address receiver) external view returns (bool exists, uint256 tokenId) {
+        tokenId = _activeTestimonial[sender][receiver];
+        exists = tokenId != 0;
+        return (exists, tokenId);
+    }
+    
+    /**
+     * @dev Internal helper function to remove a testimonial from the active list
+     * @param tokenId The token ID to remove
+     * @param sender The sender of the testimonial
+     * @param receiver The receiver of the testimonial
+     */
+    function _removeTestimonialFromActiveList(uint256 tokenId, address sender, address receiver) internal {
+        // Delete from active testimonial mapping
+        delete _activeTestimonial[sender][receiver];
+        
+        // Delete from received testimonials array
+        uint256[] storage testimonials = _receivedTestimonials[receiver];
+        uint256 indexToRemove = _testimonialIndexInArray[tokenId];
+        uint256 lastIndex = testimonials.length - 1;
+        
+        // Only perform the swap if the testimonial to remove is not the last one
+        if (indexToRemove != lastIndex) {
+            uint256 lastTokenId = testimonials[lastIndex];
+            testimonials[indexToRemove] = lastTokenId;
+            _testimonialIndexInArray[lastTokenId] = indexToRemove;
+        }
+        
+        // Remove the last element
+        testimonials.pop();
+        
+        // Delete the index mapping for the removed testimonial
+        delete _testimonialIndexInArray[tokenId];
+    }
+    
+    /**
+     * @dev Deletes a testimonial
+     * @param tokenId The token ID to delete
+     */
+    function deleteTestimonial(uint256 tokenId) external {
+        require(_ownerOf(tokenId) == msg.sender, "Only recipient can delete");
+        
+        // Check if the testimonial is still active
+        address sender = _testimonials[tokenId].sender;
+        require(_activeTestimonial[sender][msg.sender] == tokenId, "Testimonial already deleted");
+        
+        _removeTestimonialFromActiveList(tokenId, sender, msg.sender);
+        
+        emit TestimonialDeleted(tokenId, msg.sender);
     }
 }

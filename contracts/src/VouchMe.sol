@@ -14,6 +14,9 @@ contract VouchMe is ERC721URIStorage {
     // Maps user address to their received testimonial token IDs
     mapping(address => uint256[]) private _receivedTestimonials;
     
+    // Maps token ID to its index in the receiver's testimonials array
+    mapping(uint256 => uint256) private _testimonialIndexInArray;
+    
     // Maps token ID to testimonial details
     mapping(uint256 => Testimonial) private _testimonials;
     
@@ -96,7 +99,9 @@ contract VouchMe is ERC721URIStorage {
             verified: true
         });
           // Add to receiver's testimonials
+        uint256 newIndex = _receivedTestimonials[msg.sender].length;
         _receivedTestimonials[msg.sender].push(newTokenId);
+        _testimonialIndexInArray[newTokenId] = newIndex;
         
         // Update active testimonial mapping
         _activeTestimonial[senderAddress][msg.sender] = newTokenId;
@@ -225,14 +230,21 @@ contract VouchMe is ERC721URIStorage {
         
         // Delete from received testimonials array
         uint256[] storage testimonials = _receivedTestimonials[receiver];
-        for (uint256 i = 0; i < testimonials.length; i++) {
-            if (testimonials[i] == tokenId) {
-                // Swap with the last element and pop
-                testimonials[i] = testimonials[testimonials.length - 1];
-                testimonials.pop();
-                break;
-            }
+        uint256 indexToRemove = _testimonialIndexInArray[tokenId];
+        uint256 lastIndex = testimonials.length - 1;
+        
+        // Only perform the swap if the testimonial to remove is not the last one
+        if (indexToRemove != lastIndex) {
+            uint256 lastTokenId = testimonials[lastIndex];
+            testimonials[indexToRemove] = lastTokenId;
+            _testimonialIndexInArray[lastTokenId] = indexToRemove;
         }
+        
+        // Remove the last element
+        testimonials.pop();
+        
+        // Delete the index mapping for the removed testimonial
+        delete _testimonialIndexInArray[tokenId];
     }
     
     /**

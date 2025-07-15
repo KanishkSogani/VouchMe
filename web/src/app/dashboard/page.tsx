@@ -17,6 +17,8 @@ interface SignedTestimonial {
   senderAddress: string;
   receiverAddress: string;
   content: string;
+  giverName: string;
+  profileUrl: string;
   signature: string;
 }
 
@@ -120,6 +122,8 @@ export default function Dashboard() {
       const tx = await contractWithSigner.createTestimonial(
         signedData.senderAddress,
         signedData.content,
+        signedData.giverName,
+        signedData.profileUrl,
         signedData.signature
       );
 

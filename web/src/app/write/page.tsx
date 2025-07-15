@@ -188,8 +188,7 @@ export default function WritePage() {
                 className="w-full bg-[#3a3a3a] border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
               />
               <p className="text-xs text-gray-500">
-                Add your LinkedIn, GitHub, or professional profile URL to
-                enhance credibility
+                Add your LinkedIn, GitHub, or professional profile URL. It will be displayed as a clickable badge next to your name to enhance credibility.
               </p>
             </div>
 

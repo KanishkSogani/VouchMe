@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { User, ExternalLink, Calendar, Shield } from "lucide-react";
 import { ethers } from "ethers";
 import { useChainId } from "wagmi";
 import { CONTRACT_ADDRESSES, VouchMeFactory } from "@/utils/contract";
@@ -9,6 +10,8 @@ import { useToast } from "@/hooks/useToast";
 interface Testimonial {
   content: string;
   fromAddress: string;
+  giverName: string;
+  profileUrl: string;
   timestamp: number;
   verified: boolean;
 }
@@ -27,10 +30,12 @@ export default function TestimonialsPage() {
   // Extract address from query string
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const addressFromQuery = urlParams.get("address");    if (addressFromQuery && addressFromQuery.startsWith("0x")) {
+    const addressFromQuery = urlParams.get("address");
+    if (addressFromQuery && addressFromQuery.startsWith("0x")) {
       setAddress(addressFromQuery as `0x${string}`);
     } else {
-      const errorMessage = "Invalid or missing Ethereum address in URL query parameter 'address'";
+      const errorMessage =
+        "Invalid or missing Ethereum address in URL query parameter 'address'";
       setError(errorMessage);
       showError(errorMessage);
       setIsLoading(false);
@@ -41,9 +46,11 @@ export default function TestimonialsPage() {
     const fetchTestimonials = async () => {
       if (!address) return;
 
-      try {        const ethereum = window.ethereum;
+      try {
+        const ethereum = window.ethereum;
         if (!ethereum) {
-          const errorMessage = "No Ethereum provider found. Please install a wallet.";
+          const errorMessage =
+            "No Ethereum provider found. Please install a wallet.";
           setError(errorMessage);
           showError(errorMessage);
           return;
@@ -66,24 +73,63 @@ export default function TestimonialsPage() {
         const formattedTestimonials = details.map((detail) => ({
           content: detail.content,
           fromAddress: detail.sender,
+          giverName: detail.giverName,
+          profileUrl: detail.profileUrl,
           timestamp: Number(detail.timestamp),
           verified: detail.verified,
-        }));        setTestimonials(formattedTestimonials);
-        showSuccess(`Successfully loaded ${formattedTestimonials.length} testimonials`);
+        }));
+        setTestimonials(formattedTestimonials);
+        showSuccess(
+          `Successfully loaded ${formattedTestimonials.length} testimonials`
+        );
       } catch (error) {
         console.error("Error fetching testimonials:", error);
-        const errorMessage = "Failed to fetch testimonials. Please try again later.";
+        const errorMessage =
+          "Failed to fetch testimonials. Please try again later.";
         setError(errorMessage);
         showError(errorMessage);
       } finally {
         setIsLoading(false);
       }
-    };    fetchTestimonials();
+    };
+    fetchTestimonials();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, CONTRACT_ADDRESS]);
 
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleDateString();
+  // Helper function to get domain info from URL
+  const getDomainInfo = (url: string) => {
+    try {
+      const domain = new URL(url).hostname.toLowerCase();
+      if (domain.includes("linkedin.com"))
+        return {
+          name: "LinkedIn",
+          bgClass: "bg-blue-600/20 text-blue-400 hover:bg-blue-600/30",
+        };
+      if (domain.includes("github.com"))
+        return {
+          name: "GitHub",
+          bgClass: "bg-gray-600/20 text-gray-300 hover:bg-gray-600/30",
+        };
+      if (domain.includes("twitter.com") || domain.includes("x.com"))
+        return {
+          name: "Twitter",
+          bgClass: "bg-sky-500/20 text-sky-400 hover:bg-sky-500/30",
+        };
+      if (domain.includes("portfolio") || domain.includes("personal"))
+        return {
+          name: "Portfolio",
+          bgClass: "bg-purple-600/20 text-purple-400 hover:bg-purple-600/30",
+        };
+      return {
+        name: "Profile",
+        bgClass: "bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600/30",
+      };
+    } catch {
+      return {
+        name: "Profile",
+        bgClass: "bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600/30",
+      };
+    }
   };
 
   const truncateAddress = (address: string) => {
@@ -136,27 +182,64 @@ export default function TestimonialsPage() {
             testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className="bg-[#2a2a2a] rounded-xl p-6 hover:bg-[#2d2d2d] transition-colors"
+                className="bg-[#2a2a2a] rounded-xl p-6 hover:bg-[#2d2d2d] transition-colors border border-[#3a3a3a]"
               >
-                <p className="text-lg mb-6">{testimonial.content}</p>
-                <div className="flex flex-wrap justify-between items-center gap-4 text-sm text-gray-400">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-indigo-600/20 flex items-center justify-center">
-                      <span className="font-mono text-xs">From</span>
+                {/* Header with giver info */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                      <User size={20} className="text-white" />
                     </div>
-                    <span className="font-mono">
-                      {truncateAddress(testimonial.fromAddress)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <span className="text-gray-500">
-                      {formatDate(testimonial.timestamp)}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                      Verified
+                    <div>
+                      <h3 className="font-semibold text-white text-lg">
+                        {testimonial.giverName || "Anonymous"}
+                      </h3>
+                      <div className="flex items-center gap-3 text-sm">
+                        <span className="font-mono text-gray-400">
+                          {truncateAddress(testimonial.fromAddress)}
+                        </span>
+                        {testimonial.profileUrl && (
+                          <a
+                            href={testimonial.profileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all hover:scale-105 ${
+                              getDomainInfo(testimonial.profileUrl).bgClass
+                            }`}
+                          >
+                            <ExternalLink size={11} />
+                            {getDomainInfo(testimonial.profileUrl).name}
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
+                  <div className="flex items-center gap-2 text-green-400 bg-green-500/10 px-3 py-1.5 rounded-full">
+                    <Shield size={14} />
+                    <span className="text-sm font-medium">Verified</span>
+                  </div>
+                </div>
+
+                {/* Testimonial content */}
+                <div className="mb-4">
+                  <p className="text-gray-100 leading-relaxed text-lg">
+                    &ldquo;{testimonial.content}&rdquo;
+                  </p>
+                </div>
+
+                {/* Footer with timestamp */}
+                <div className="flex items-center gap-2 text-sm text-gray-500 pt-4 border-t border-[#3a3a3a]">
+                  <Calendar size={14} />
+                  <span>
+                    {new Date(testimonial.timestamp * 1000).toLocaleDateString(
+                      "en-US",
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      }
+                    )}
+                  </span>
                 </div>
               </div>
             ))

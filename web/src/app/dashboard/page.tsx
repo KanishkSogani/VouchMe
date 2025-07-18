@@ -11,9 +11,13 @@ import {
   Shield,
   AlertTriangle,
   X,
+  UserCheck,
+  Mail,
+  FileText,
 } from "lucide-react";
 import { useAccount, useChainId } from "wagmi";
 import { ethers } from "ethers";
+import Link from "next/link";
 import { CONTRACT_ADDRESSES, VouchMeFactory } from "@/utils/contract";
 import { useToast } from "@/hooks/useToast";
 
@@ -35,6 +39,12 @@ interface SignedTestimonial {
   signature: string;
 }
 
+interface Profile {
+  name: string;
+  contact: string;
+  bio: string;
+}
+
 export default function Dashboard() {
   const { address } = useAccount();
   const chainId = useChainId();
@@ -46,6 +56,13 @@ export default function Dashboard() {
   const [isFetchingTestimonials, setIsFetchingTestimonials] = useState(false);
   const [baseUrl, setBaseUrl] = useState("vouchme.stability.nexus");
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profile, setProfile] = useState<Profile>({
+    name: "",
+    contact: "",
+    bio: "",
+  });
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
   const [pendingTestimonial, setPendingTestimonial] =
     useState<SignedTestimonial | null>(null);
   const [existingTestimonial, setExistingTestimonial] =
@@ -148,6 +165,258 @@ export default function Dashboard() {
     fetchTestimonials();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, CONTRACT_ADDRESS]);
+
+  // Fetch user profile
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!address) {
+        setIsProfileLoading(false);
+        return;
+      }
+
+      try {
+        setIsProfileLoading(true);
+        
+        // Small delay to ensure smooth transition
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const contract = VouchMeFactory.connect(CONTRACT_ADDRESS, provider);
+
+        const userProfile = await contract.userProfiles(address);
+
+        setProfile({
+          name: userProfile.name,
+          contact: userProfile.contact,
+          bio: userProfile.bio,
+        });
+
+        // Check if profile is incomplete and show modal after a delay
+        const isIncomplete =
+          !userProfile.name || !userProfile.contact || !userProfile.bio;
+        if (isIncomplete) {
+          // Delay showing the modal to prevent flash on page load
+          setTimeout(() => {
+            setShowProfileModal(true);
+          }, 1000); // Show after 1 second
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        // Don't show modal if there's an error fetching profile
+        setProfile({ name: "", contact: "", bio: "" });
+      } finally {
+        setIsProfileLoading(false);
+      }
+    };
+
+    if (address) {
+      fetchProfile();
+    }
+  }, [address, CONTRACT_ADDRESS]);
+
+  const handleDismissProfileModal = () => {
+    setShowProfileModal(false);
+  };
+
+  // Profile Completion Modal Component
+  const ProfileCompletionModal = () => {
+    if (!showProfileModal) return null;
+
+    // Show loading state while fetching profile
+    if (isProfileLoading) {
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-[#2a2a2a] rounded-lg max-w-md w-full p-6 relative">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                <UserCheck className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-xl font-semibold text-white mb-2">
+                Checking Profile...
+              </h2>
+              <p className="text-gray-400 text-sm">
+                Please wait while we load your profile information
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const getCompletionStatus = () => {
+      const total = 3;
+      const completed = [profile.name, profile.contact, profile.bio].filter(
+        Boolean
+      ).length;
+      return {
+        completed,
+        total,
+        percentage: Math.round((completed / total) * 100),
+      };
+    };
+
+    const status = getCompletionStatus();
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div className="bg-[#2a2a2a] rounded-lg max-w-md w-full p-6 relative">
+          {/* Close button */}
+          <button
+            onClick={handleDismissProfileModal}
+            className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+
+          {/* Header */}
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <UserCheck className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-xl font-semibold text-white mb-2">
+              Complete Your Profile
+            </h2>
+            <p className="text-gray-400 text-sm">
+              Help others know who you are by completing your profile
+              information
+            </p>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm text-gray-400">Profile Completion</span>
+              <span className="text-sm text-indigo-400">
+                {status.percentage}%
+              </span>
+            </div>
+            <div className="w-full bg-[#3a3a3a] rounded-full h-2">
+              <div
+                className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${status.percentage}%` }}
+              ></div>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              {status.completed} of {status.total} sections completed
+            </p>
+          </div>
+
+          {/* Checklist */}
+          <div className="space-y-3 mb-6">
+            <div className="flex items-center space-x-3">
+              {profile.name ? (
+                <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-3 h-3 text-white"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              ) : (
+                <UserCheck className="w-5 h-5 text-gray-400" />
+              )}
+              <span
+                className={`text-sm ${
+                  profile.name ? "text-green-400" : "text-gray-400"
+                }`}
+              >
+                Display Name
+              </span>
+            </div>
+
+            <div className="flex items-center space-x-3">
+              {profile.contact ? (
+                <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-3 h-3 text-white"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              ) : (
+                <Mail className="w-5 h-5 text-gray-400" />
+              )}
+              <span
+                className={`text-sm ${
+                  profile.contact ? "text-green-400" : "text-gray-400"
+                }`}
+              >
+                Contact Information
+              </span>
+            </div>
+
+            <div className="flex items-center space-x-3">
+              {profile.bio ? (
+                <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-3 h-3 text-white"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              ) : (
+                <FileText className="w-5 h-5 text-gray-400" />
+              )}
+              <span
+                className={`text-sm ${
+                  profile.bio ? "text-green-400" : "text-gray-400"
+                }`}
+              >
+                Bio Description
+              </span>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex space-x-3">
+            <button
+              onClick={handleDismissProfileModal}
+              className="flex-1 px-4 py-2 bg-[#3a3a3a] text-gray-300 rounded-lg hover:bg-[#4a4a4a] transition-colors text-sm"
+            >
+              Later
+            </button>
+            <Link
+              href="/profile"
+              className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm text-center"
+              onClick={handleDismissProfileModal}
+            >
+              Complete Profile
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const handleAddTestimonial = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -551,6 +820,9 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Profile Completion Modal */}
+      <ProfileCompletionModal />
     </div>
   );
 }

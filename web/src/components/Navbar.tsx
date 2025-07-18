@@ -58,12 +58,20 @@ const Navbar = ({
             )}
 
             {!isLandingPage && isAuthenticated && (
-              <Link
-                href="/profile"
-                className="text-gray-300 hover:text-white transition-colors font-semibold"
-              >
-                Profile
-              </Link>
+              <>
+                <Link
+                  href="/dashboard"
+                  className="text-gray-300 hover:text-white transition-colors font-semibold"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/profile"
+                  className="text-gray-300 hover:text-white transition-colors font-semibold"
+                >
+                  Profile
+                </Link>
+              </>
             )}
 
             {!isAuthenticated && (
@@ -117,13 +125,22 @@ const Navbar = ({
               )}
 
               {!isLandingPage && isAuthenticated && (
-                <Link
-                  href="/profile"
-                  className="block w-full text-left px-3 py-2 text-gray-300 hover:text-white transition-colors"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Profile
-                </Link>
+                <>
+                  <Link
+                    href="/dashboard"
+                    className="block w-full text-left px-3 py-2 text-gray-300 hover:text-white transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/profile"
+                    className="block w-full text-left px-3 py-2 text-gray-300 hover:text-white transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Profile
+                  </Link>
+                </>
               )}
 
               {!isAuthenticated && (

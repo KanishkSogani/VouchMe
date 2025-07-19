@@ -44,48 +44,50 @@ export default function ProfilePage() {
   const validateField = (field: keyof Profile, value: string): string => {
     if (!value.trim()) {
       switch (field) {
-        case 'name':
-          return 'Name is required';
-        case 'contact':
-          return 'Contact information is required';
-        case 'bio':
-          return 'Bio is required';
+        case "name":
+          return "Name is required";
+        case "contact":
+          return "Contact information is required";
+        case "bio":
+          return "Bio is required";
         default:
-          return 'This field is required';
+          return "This field is required";
       }
     }
-    
-    if (field === 'name' && value.trim().length < 2) {
-      return 'Name must be at least 2 characters long';
+
+    if (field === "name" && value.trim().length < 2) {
+      return "Name must be at least 2 characters long";
     }
-    
-    if (field === 'contact' && value.trim().length < 3) {
-      return 'Contact information must be at least 3 characters long';
+
+    if (field === "contact" && value.trim().length < 3) {
+      return "Contact information must be at least 3 characters long";
     }
-    
-    if (field === 'bio' && value.trim().length < 10) {
-      return 'Bio must be at least 10 characters long';
+
+    if (field === "bio" && value.trim().length < 10) {
+      return "Bio must be at least 10 characters long";
     }
-    
-    return '';
+
+    return "";
   };
 
   const validateAllFields = (): boolean => {
     const newErrors: typeof errors = {};
-    
-    newErrors.name = validateField('name', tempProfile.name);
-    newErrors.contact = validateField('contact', tempProfile.contact);
-    newErrors.bio = validateField('bio', tempProfile.bio);
-    
+
+    newErrors.name = validateField("name", tempProfile.name);
+    newErrors.contact = validateField("contact", tempProfile.contact);
+    newErrors.bio = validateField("bio", tempProfile.bio);
+
     setErrors(newErrors);
-    
+
     return !newErrors.name && !newErrors.contact && !newErrors.bio;
   };
 
   const isFormValid = (): boolean => {
-    return tempProfile.name.trim() !== '' && 
-           tempProfile.contact.trim() !== '' && 
-           tempProfile.bio.trim() !== '';
+    return (
+      tempProfile.name.trim() !== "" &&
+      tempProfile.contact.trim() !== "" &&
+      tempProfile.bio.trim() !== ""
+    );
   };
 
   // Fetch user profile
@@ -171,10 +173,10 @@ export default function ProfilePage() {
   // Handle input changes with validation
   const handleInputChange = (field: keyof Profile, value: string) => {
     setTempProfile({ ...tempProfile, [field]: value });
-    
+
     // Clear error for this field when user starts typing
     if (errors[field]) {
-      setErrors({ ...errors, [field]: '' });
+      setErrors({ ...errors, [field]: "" });
     }
   };
 
@@ -268,12 +270,14 @@ export default function ProfilePage() {
                       <input
                         type="text"
                         value={tempProfile.name}
-                        onChange={(e) => handleInputChange('name', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("name", e.target.value)
+                        }
                         placeholder="Enter your full name"
                         className={`w-full bg-[#3a3a3a] rounded-lg p-4 text-white border transition-colors placeholder-gray-500 ${
-                          errors.name 
-                            ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' 
-                            : 'border-transparent focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'
+                          errors.name
+                            ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                            : "border-transparent focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                         }`}
                       />
                       {errors.name && (
@@ -306,12 +310,14 @@ export default function ProfilePage() {
                       <input
                         type="text"
                         value={tempProfile.contact}
-                        onChange={(e) => handleInputChange('contact', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("contact", e.target.value)
+                        }
                         placeholder="Email, LinkedIn, or other contact info"
                         className={`w-full bg-[#3a3a3a] rounded-lg p-4 text-white border transition-colors placeholder-gray-500 ${
-                          errors.contact 
-                            ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' 
-                            : 'border-transparent focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'
+                          errors.contact
+                            ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                            : "border-transparent focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                         }`}
                       />
                       {errors.contact && (
@@ -343,13 +349,15 @@ export default function ProfilePage() {
                     <div>
                       <textarea
                         value={tempProfile.bio}
-                        onChange={(e) => handleInputChange('bio', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("bio", e.target.value)
+                        }
                         placeholder="Tell people about yourself, your profession, interests..."
                         rows={4}
                         className={`w-full bg-[#3a3a3a] rounded-lg p-4 text-white border transition-colors placeholder-gray-500 resize-none ${
-                          errors.bio 
-                            ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' 
-                            : 'border-transparent focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'
+                          errors.bio
+                            ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                            : "border-transparent focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                         }`}
                       />
                       {errors.bio && (
@@ -388,8 +396,8 @@ export default function ProfilePage() {
                       disabled={isSaving || !isFormValid()}
                       className={`px-6 py-3 rounded-lg transition-colors font-medium flex items-center gap-2 ${
                         isSaving || !isFormValid()
-                          ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                          : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                          ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                          : "bg-indigo-600 hover:bg-indigo-700 text-white"
                       }`}
                     >
                       {isSaving ? (
@@ -401,7 +409,7 @@ export default function ProfilePage() {
                     </button>
                   </div>
                 )}
-                
+
                 {/* Validation Summary */}
                 {isEditing && !isFormValid() && (
                   <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mt-4">
@@ -409,7 +417,9 @@ export default function ProfilePage() {
                       <div className="w-4 h-4 rounded-full border-2 border-red-400 flex items-center justify-center">
                         <span className="text-xs">!</span>
                       </div>
-                      <span className="font-medium">Please complete all required fields before saving</span>
+                      <span className="font-medium">
+                        Please complete all required fields before saving
+                      </span>
                     </div>
                   </div>
                 )}

@@ -188,7 +188,8 @@ export default function WritePage() {
             {!isProfileComplete && (
               <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                 <p className="text-yellow-300 text-sm">
-                  Please ask the user to complete their profile in the profile section before creating a testimonial.
+                  Please ask the user to complete their profile in the profile
+                  section before creating a testimonial.
                 </p>
               </div>
             )}

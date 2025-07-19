@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { User, ExternalLink, Calendar, Shield } from "lucide-react";
+import {
+  User,
+  ExternalLink,
+  Calendar,
+  Shield,
+  Mail,
+  AlertTriangle,
+} from "lucide-react";
 import { ethers } from "ethers";
 import { useChainId } from "wagmi";
 import { CONTRACT_ADDRESSES, VouchMeFactory } from "@/utils/contract";
@@ -16,9 +23,17 @@ interface Testimonial {
   verified: boolean;
 }
 
+interface Profile {
+  name: string;
+  contact: string;
+  bio: string;
+}
+
 export default function TestimonialsPage() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const chainId = useChainId();
   const [address, setAddress] = useState<`0x${string}` | null>(null);
@@ -27,7 +42,7 @@ export default function TestimonialsPage() {
   const CONTRACT_ADDRESS =
     CONTRACT_ADDRESSES[chainId] || CONTRACT_ADDRESSES[534351];
 
-  // Extract address from query string
+  // Extract address from query string and fetch profile
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const addressFromQuery = urlParams.get("address");
@@ -39,12 +54,55 @@ export default function TestimonialsPage() {
       setError(errorMessage);
       showError(errorMessage);
       setIsLoading(false);
+      setProfileLoading(false);
     }
   }, [showError]);
+
+  // Fetch user profile
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!address) return;
+
+      try {
+        setProfileLoading(true);
+        const ethereum = window.ethereum;
+        if (!ethereum) {
+          console.warn("No Ethereum provider found");
+          return;
+        }
+
+        const provider = new ethers.BrowserProvider(ethereum);
+        const contract = VouchMeFactory.connect(CONTRACT_ADDRESS, provider);
+
+        const userProfile = await contract.userProfiles(address);
+        setProfile({
+          name: userProfile.name,
+          contact: userProfile.contact,
+          bio: userProfile.bio,
+        });
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        // Don't show error for profile fetch as it's not critical
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [address, CONTRACT_ADDRESS]);
 
   useEffect(() => {
     const fetchTestimonials = async () => {
       if (!address) return;
+
+      // Wait for profile to load first
+      if (profileLoading) return;
+
+      // Don't fetch testimonials if profile is incomplete or null
+      if (!profile || !profile.name || !profile.bio || !profile.contact) {
+        setIsLoading(false);
+        return;
+      }
 
       try {
         const ethereum = window.ethereum;
@@ -79,9 +137,11 @@ export default function TestimonialsPage() {
           verified: detail.verified,
         }));
         setTestimonials(formattedTestimonials);
-        showSuccess(
-          `Successfully loaded ${formattedTestimonials.length} testimonials`
-        );
+        if (formattedTestimonials.length > 0) {
+          showSuccess(
+            `Successfully loaded ${formattedTestimonials.length} testimonials`
+          );
+        }
       } catch (error) {
         console.error("Error fetching testimonials:", error);
         const errorMessage =
@@ -94,7 +154,7 @@ export default function TestimonialsPage() {
     };
     fetchTestimonials();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address, CONTRACT_ADDRESS]);
+  }, [address, CONTRACT_ADDRESS, profile, profileLoading]);
 
   // Helper function to get domain info from URL
   const getDomainInfo = (url: string) => {
@@ -152,9 +212,48 @@ export default function TestimonialsPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-[#1a1a1a] text-white py-8">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-center">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-center">
+            <div className="w-12 h-12 mx-auto mb-4 bg-red-500/20 rounded-full flex items-center justify-center">
+              <User className="w-6 h-6 text-red-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-red-300 mb-2">
+              Invalid Request
+            </h3>
             <p className="text-red-400">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if profile is incomplete after loading
+  if (
+    !isLoading &&
+    !profileLoading &&
+    address &&
+    (!profile || !profile.name || !profile.bio || !profile.contact)
+  ) {
+    return (
+      <div className="min-h-screen bg-[#1a1a1a] text-white py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-center">
+            <div className="w-12 h-12 mx-auto mb-4 bg-red-500/20 rounded-full flex items-center justify-center">
+              <AlertTriangle className="w-6 h-6 text-red-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-red-300 mb-2">
+              Profile Incomplete
+            </h3>
+            <p className="text-red-400">
+              This user&apos;s profile is incomplete. They need to complete
+              their profile before receiving testimonials.
+            </p>
+            <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+              <p className="text-yellow-300 text-sm">
+                Please ask the user to complete their profile in the profile
+                section before viewing testimonials.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -163,93 +262,231 @@ export default function TestimonialsPage() {
 
   return (
     <div className="min-h-screen bg-[#1a1a1a] text-white py-8">
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header Section */}
         <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold mb-4">Public Testimonials</h1>
-          <p className="text-gray-400">
-            Viewing testimonials for{" "}
-            {address ? truncateAddress(address) : "unknown address"}
+          <h1 className="text-4xl font-bold mb-4 text-white">Testimonials</h1>
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            Authentic feedback and recommendations from verified connections
           </p>
-          <div className="mt-2 text-sm">
-            <span className="bg-indigo-600/20 text-indigo-400 px-3 py-1 rounded-full">
-              {testimonials.length} Testimonials
-            </span>
-          </div>
         </div>
 
-        <div className="space-y-6">
-          {testimonials.length > 0 ? (
-            testimonials.map((testimonial, index) => (
-              <div
-                key={index}
-                className="bg-[#2a2a2a] rounded-xl p-6 hover:bg-[#2d2d2d] transition-colors border border-[#3a3a3a]"
-              >
-                {/* Header with giver info */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                      <User size={20} className="text-white" />
+        {/* Main Content Grid */}
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Profile Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="bg-[#2a2a2a] rounded-2xl p-5 border border-gray-800 lg:sticky lg:top-8">
+              {profileLoading ? (
+                <div className="animate-pulse text-center">
+                  <div className="w-14 h-14 bg-gray-600 rounded-full mx-auto mb-3"></div>
+                  <div className="space-y-3">
+                    <div className="h-4 bg-gray-600 rounded w-2/3 mx-auto"></div>
+                    <div className="h-4 bg-gray-600 rounded w-1/3 mx-auto"></div>
+                    <div className="space-y-2 mt-4">
+                      <div className="h-3 bg-gray-600 rounded w-1/3"></div>
+                      <div className="h-10 bg-gray-600 rounded"></div>
                     </div>
+                    <div className="space-y-2">
+                      <div className="h-3 bg-gray-600 rounded w-1/3"></div>
+                      <div className="h-8 bg-gray-600 rounded"></div>
+                    </div>
+                    <div className="h-3 bg-gray-600 rounded w-2/3 mx-auto"></div>
+                  </div>
+                </div>
+              ) : profile &&
+                (profile.name || profile.bio || profile.contact) ? (
+                <div className="text-center">
+                  {/* Profile Avatar */}
+                  <div className="w-14 h-14 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
+                    <User className="w-7 h-7 text-gray-200" />
+                  </div>
+
+                  {/* Profile Info */}
+                  <div className="space-y-4">
                     <div>
-                      <h3 className="font-semibold text-white text-lg">
-                        {testimonial.giverName || "Anonymous"}
+                      <h3 className="text-lg font-bold text-white mb-1">
+                        {profile.name || "Professional User"}
                       </h3>
-                      <div className="flex items-center gap-3 text-sm">
-                        <span className="font-mono text-gray-400">
-                          {truncateAddress(testimonial.fromAddress)}
-                        </span>
-                        {testimonial.profileUrl && (
-                          <a
-                            href={testimonial.profileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all hover:scale-105 ${
-                              getDomainInfo(testimonial.profileUrl).bgClass
-                            }`}
-                          >
-                            <ExternalLink size={11} />
-                            {getDomainInfo(testimonial.profileUrl).name}
-                          </a>
-                        )}
+                      <div className="inline-flex items-center gap-1.5 text-green-400 text-xs bg-green-500/10 px-2 py-1 rounded-md border border-green-500/20">
+                        <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                        <span className="font-medium">Verified</span>
+                      </div>
+                    </div>
+
+                    {/* Bio Section */}
+                    {profile.bio && (
+                      <div className="text-left space-y-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1 h-4 bg-gray-500 rounded-full"></div>
+                          <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+                            About
+                          </span>
+                        </div>
+                        <div className="bg-gray-800/20 rounded-lg p-3 border border-gray-700/30">
+                          <p className="text-gray-300 text-sm leading-relaxed">
+                            {profile.bio}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Contact Section */}
+                    {profile.contact && (
+                      <div className="text-left space-y-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1 h-4 bg-gray-500 rounded-full"></div>
+                          <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+                            Contact
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 text-gray-300 text-sm p-3 bg-gray-800/20 rounded-lg border border-gray-700/30">
+                          <Mail className="w-4 h-4 flex-shrink-0 text-gray-500" />
+                          <span className="truncate">{profile.contact}</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Stats */}
+                    <div className="pt-3 border-t border-gray-700/50">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-white">
+                          {testimonials.length}
+                        </div>
+                        <div className="text-xs text-gray-400 uppercase tracking-wider">
+                          Testimonials
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 text-green-400 bg-green-500/10 px-3 py-1.5 rounded-full">
-                    <Shield size={14} />
-                    <span className="text-sm font-medium">Verified</span>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <div className="w-14 h-14 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <User className="w-7 h-7 text-gray-300" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-1">
+                    {address ? truncateAddress(address) : "Unknown User"}
+                  </h3>
+                  <div className="inline-flex items-center gap-1.5 text-gray-400 text-xs bg-gray-500/10 px-2 py-1 rounded-md border border-gray-500/20">
+                    <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
+                    <span className="font-medium">Profile Not Set</span>
+                  </div>
+                  <div className="pt-3 border-t border-gray-700/50 mt-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-white">
+                        {testimonials.length}
+                      </div>
+                      <div className="text-xs text-gray-400 uppercase tracking-wider">
+                        Testimonials
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                {/* Testimonial content */}
-                <div className="mb-4">
-                  <p className="text-gray-100 leading-relaxed text-lg">
-                    &ldquo;{testimonial.content}&rdquo;
-                  </p>
-                </div>
-
-                {/* Footer with timestamp */}
-                <div className="flex items-center gap-2 text-sm text-gray-500 pt-4 border-t border-[#3a3a3a]">
-                  <Calendar size={14} />
-                  <span>
-                    {new Date(testimonial.timestamp * 1000).toLocaleDateString(
-                      "en-US",
-                      {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      }
-                    )}
-                  </span>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="bg-[#2a2a2a] rounded-xl p-8 text-center">
-              <p className="text-gray-400">
-                No testimonials found for this address.
-              </p>
+              )}
             </div>
-          )}
+          </div>
+
+          {/* Testimonials Content */}
+          <div className="lg:col-span-2">
+            <div className="space-y-6">
+              {testimonials.length > 0 ? (
+                testimonials.map((testimonial, index) => (
+                  <div
+                    key={index}
+                    className="bg-[#2a2a2a] rounded-xl p-6 hover:bg-[#2d2d2d] transition-colors border border-[#3a3a3a]"
+                  >
+                    {/* Header with giver info */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                          <User size={20} className="text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-white text-lg">
+                            {testimonial.giverName || "Anonymous"}
+                          </h3>
+                          <div className="flex items-center gap-3 text-sm">
+                            <span className="font-mono text-gray-400">
+                              {truncateAddress(testimonial.fromAddress)}
+                            </span>
+                            {testimonial.profileUrl && (
+                              <a
+                                href={testimonial.profileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all hover:scale-105 ${
+                                  getDomainInfo(testimonial.profileUrl).bgClass
+                                }`}
+                              >
+                                <ExternalLink size={11} />
+                                {getDomainInfo(testimonial.profileUrl).name}
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-green-400 bg-green-500/10 px-3 py-1.5 rounded-full">
+                        <Shield size={14} />
+                        <span className="text-sm font-medium">Verified</span>
+                      </div>
+                    </div>
+
+                    {/* Testimonial content */}
+                    <div className="mb-4">
+                      <p className="text-gray-100 leading-relaxed text-lg">
+                        &ldquo;{testimonial.content}&rdquo;
+                      </p>
+                    </div>
+
+                    {/* Footer with timestamp */}
+                    <div className="flex items-center gap-2 text-sm text-gray-500 pt-4 border-t border-[#3a3a3a]">
+                      <Calendar size={14} />
+                      <span>
+                        {new Date(
+                          testimonial.timestamp * 1000
+                        ).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="bg-[#2a2a2a] rounded-2xl p-12 text-center border border-gray-800">
+                  <div className="max-w-md mx-auto">
+                    {/* Icon */}
+                    <div className="w-20 h-20 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                      <User className="w-10 h-10 text-gray-300" />
+                    </div>
+
+                    {/* Heading */}
+                    <h3 className="text-xl font-bold text-white mb-3">
+                      No Testimonials Yet
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-gray-400 leading-relaxed mb-6">
+                      This user hasn&apos;t received any testimonials yet. Be
+                      the first to share your experience working with them.
+                    </p>
+
+                    {/* Action suggestion */}
+                    <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/50">
+                      <p className="text-gray-300 text-sm leading-relaxed">
+                        <span className="font-medium text-indigo-400">
+                          Tip:
+                        </span>{" "}
+                        Testimonials help build trust and showcase expertise
+                        within the community.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

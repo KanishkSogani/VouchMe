@@ -28,6 +28,8 @@ export declare namespace VouchMe {
     sender: AddressLike;
     receiver: AddressLike;
     content: string;
+    giverName: string;
+    profileUrl: string;
     timestamp: BigNumberish;
     verified: boolean;
   };
@@ -36,12 +38,16 @@ export declare namespace VouchMe {
     sender: string,
     receiver: string,
     content: string,
+    giverName: string,
+    profileUrl: string,
     timestamp: bigint,
     verified: boolean
   ] & {
     sender: string;
     receiver: string;
     content: string;
+    giverName: string;
+    profileUrl: string;
     timestamp: bigint;
     verified: boolean;
   };
@@ -53,20 +59,24 @@ export interface VouchMeInterface extends Interface {
       | "approve"
       | "balanceOf"
       | "createTestimonial"
+      | "deleteTestimonial"
       | "getApproved"
       | "getReceivedTestimonials"
       | "getTestimonialCount"
       | "getTestimonialDetails"
+      | "hasExistingTestimonial"
       | "isApprovedForAll"
       | "name"
       | "ownerOf"
       | "safeTransferFrom(address,address,uint256)"
       | "safeTransferFrom(address,address,uint256,bytes)"
       | "setApprovalForAll"
+      | "setProfile"
       | "supportsInterface"
       | "symbol"
       | "tokenURI"
       | "transferFrom"
+      | "userProfiles"
   ): FunctionFragment;
 
   getEvent(
@@ -75,7 +85,10 @@ export interface VouchMeInterface extends Interface {
       | "ApprovalForAll"
       | "BatchMetadataUpdate"
       | "MetadataUpdate"
+      | "ProfileUpdated"
       | "TestimonialCreated"
+      | "TestimonialDeleted"
+      | "TestimonialUpdated"
       | "TestimonialVerified"
       | "Transfer"
   ): EventFragment;
@@ -90,7 +103,11 @@ export interface VouchMeInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "createTestimonial",
-    values: [AddressLike, string, BytesLike]
+    values: [AddressLike, string, string, string, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "deleteTestimonial",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "getApproved",
@@ -107,6 +124,10 @@ export interface VouchMeInterface extends Interface {
   encodeFunctionData(
     functionFragment: "getTestimonialDetails",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "hasExistingTestimonial",
+    values: [AddressLike, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "isApprovedForAll",
@@ -130,6 +151,10 @@ export interface VouchMeInterface extends Interface {
     values: [AddressLike, boolean]
   ): string;
   encodeFunctionData(
+    functionFragment: "setProfile",
+    values: [string, string, string]
+  ): string;
+  encodeFunctionData(
     functionFragment: "supportsInterface",
     values: [BytesLike]
   ): string;
@@ -142,11 +167,19 @@ export interface VouchMeInterface extends Interface {
     functionFragment: "transferFrom",
     values: [AddressLike, AddressLike, BigNumberish]
   ): string;
+  encodeFunctionData(
+    functionFragment: "userProfiles",
+    values: [AddressLike]
+  ): string;
 
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "createTestimonial",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "deleteTestimonial",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -163,6 +196,10 @@ export interface VouchMeInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getTestimonialDetails",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "hasExistingTestimonial",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -183,6 +220,7 @@ export interface VouchMeInterface extends Interface {
     functionFragment: "setApprovalForAll",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "setProfile", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "supportsInterface",
     data: BytesLike
@@ -191,6 +229,10 @@ export interface VouchMeInterface extends Interface {
   decodeFunctionResult(functionFragment: "tokenURI", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferFrom",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "userProfiles",
     data: BytesLike
   ): Result;
 }
@@ -263,6 +305,18 @@ export namespace MetadataUpdateEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
+export namespace ProfileUpdatedEvent {
+  export type InputTuple = [user: AddressLike];
+  export type OutputTuple = [user: string];
+  export interface OutputObject {
+    user: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
 export namespace TestimonialCreatedEvent {
   export type InputTuple = [
     tokenId: BigNumberish,
@@ -274,6 +328,41 @@ export namespace TestimonialCreatedEvent {
     tokenId: bigint;
     sender: string;
     receiver: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace TestimonialDeletedEvent {
+  export type InputTuple = [tokenId: BigNumberish, receiver: AddressLike];
+  export type OutputTuple = [tokenId: bigint, receiver: string];
+  export interface OutputObject {
+    tokenId: bigint;
+    receiver: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace TestimonialUpdatedEvent {
+  export type InputTuple = [
+    sender: AddressLike,
+    receiver: AddressLike,
+    newTokenId: BigNumberish
+  ];
+  export type OutputTuple = [
+    sender: string,
+    receiver: string,
+    newTokenId: bigint
+  ];
+  export interface OutputObject {
+    sender: string;
+    receiver: string;
+    newTokenId: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -364,8 +453,20 @@ export interface VouchMe extends BaseContract {
   balanceOf: TypedContractMethod<[owner: AddressLike], [bigint], "view">;
 
   createTestimonial: TypedContractMethod<
-    [senderAddress: AddressLike, content: string, signature: BytesLike],
+    [
+      senderAddress: AddressLike,
+      content: string,
+      giverName: string,
+      profileUrl: string,
+      signature: BytesLike
+    ],
     [bigint],
+    "nonpayable"
+  >;
+
+  deleteTestimonial: TypedContractMethod<
+    [tokenId: BigNumberish],
+    [void],
     "nonpayable"
   >;
 
@@ -386,6 +487,12 @@ export interface VouchMe extends BaseContract {
   getTestimonialDetails: TypedContractMethod<
     [tokenId: BigNumberish],
     [VouchMe.TestimonialStructOutput],
+    "view"
+  >;
+
+  hasExistingTestimonial: TypedContractMethod<
+    [sender: AddressLike, receiver: AddressLike],
+    [[boolean, bigint] & { exists: boolean; tokenId: bigint }],
     "view"
   >;
 
@@ -422,6 +529,12 @@ export interface VouchMe extends BaseContract {
     "nonpayable"
   >;
 
+  setProfile: TypedContractMethod<
+    [name: string, contact: string, bio: string],
+    [void],
+    "nonpayable"
+  >;
+
   supportsInterface: TypedContractMethod<
     [interfaceId: BytesLike],
     [boolean],
@@ -436,6 +549,12 @@ export interface VouchMe extends BaseContract {
     [from: AddressLike, to: AddressLike, tokenId: BigNumberish],
     [void],
     "nonpayable"
+  >;
+
+  userProfiles: TypedContractMethod<
+    [arg0: AddressLike],
+    [[string, string, string] & { name: string; contact: string; bio: string }],
+    "view"
   >;
 
   getFunction<T extends ContractMethod = ContractMethod>(
@@ -455,10 +574,19 @@ export interface VouchMe extends BaseContract {
   getFunction(
     nameOrSignature: "createTestimonial"
   ): TypedContractMethod<
-    [senderAddress: AddressLike, content: string, signature: BytesLike],
+    [
+      senderAddress: AddressLike,
+      content: string,
+      giverName: string,
+      profileUrl: string,
+      signature: BytesLike
+    ],
     [bigint],
     "nonpayable"
   >;
+  getFunction(
+    nameOrSignature: "deleteTestimonial"
+  ): TypedContractMethod<[tokenId: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "getApproved"
   ): TypedContractMethod<[tokenId: BigNumberish], [string], "view">;
@@ -473,6 +601,13 @@ export interface VouchMe extends BaseContract {
   ): TypedContractMethod<
     [tokenId: BigNumberish],
     [VouchMe.TestimonialStructOutput],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "hasExistingTestimonial"
+  ): TypedContractMethod<
+    [sender: AddressLike, receiver: AddressLike],
+    [[boolean, bigint] & { exists: boolean; tokenId: bigint }],
     "view"
   >;
   getFunction(
@@ -515,6 +650,13 @@ export interface VouchMe extends BaseContract {
     "nonpayable"
   >;
   getFunction(
+    nameOrSignature: "setProfile"
+  ): TypedContractMethod<
+    [name: string, contact: string, bio: string],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "supportsInterface"
   ): TypedContractMethod<[interfaceId: BytesLike], [boolean], "view">;
   getFunction(
@@ -529,6 +671,13 @@ export interface VouchMe extends BaseContract {
     [from: AddressLike, to: AddressLike, tokenId: BigNumberish],
     [void],
     "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "userProfiles"
+  ): TypedContractMethod<
+    [arg0: AddressLike],
+    [[string, string, string] & { name: string; contact: string; bio: string }],
+    "view"
   >;
 
   getEvent(
@@ -560,11 +709,32 @@ export interface VouchMe extends BaseContract {
     MetadataUpdateEvent.OutputObject
   >;
   getEvent(
+    key: "ProfileUpdated"
+  ): TypedContractEvent<
+    ProfileUpdatedEvent.InputTuple,
+    ProfileUpdatedEvent.OutputTuple,
+    ProfileUpdatedEvent.OutputObject
+  >;
+  getEvent(
     key: "TestimonialCreated"
   ): TypedContractEvent<
     TestimonialCreatedEvent.InputTuple,
     TestimonialCreatedEvent.OutputTuple,
     TestimonialCreatedEvent.OutputObject
+  >;
+  getEvent(
+    key: "TestimonialDeleted"
+  ): TypedContractEvent<
+    TestimonialDeletedEvent.InputTuple,
+    TestimonialDeletedEvent.OutputTuple,
+    TestimonialDeletedEvent.OutputObject
+  >;
+  getEvent(
+    key: "TestimonialUpdated"
+  ): TypedContractEvent<
+    TestimonialUpdatedEvent.InputTuple,
+    TestimonialUpdatedEvent.OutputTuple,
+    TestimonialUpdatedEvent.OutputObject
   >;
   getEvent(
     key: "TestimonialVerified"
@@ -626,6 +796,17 @@ export interface VouchMe extends BaseContract {
       MetadataUpdateEvent.OutputObject
     >;
 
+    "ProfileUpdated(address)": TypedContractEvent<
+      ProfileUpdatedEvent.InputTuple,
+      ProfileUpdatedEvent.OutputTuple,
+      ProfileUpdatedEvent.OutputObject
+    >;
+    ProfileUpdated: TypedContractEvent<
+      ProfileUpdatedEvent.InputTuple,
+      ProfileUpdatedEvent.OutputTuple,
+      ProfileUpdatedEvent.OutputObject
+    >;
+
     "TestimonialCreated(uint256,address,address)": TypedContractEvent<
       TestimonialCreatedEvent.InputTuple,
       TestimonialCreatedEvent.OutputTuple,
@@ -635,6 +816,28 @@ export interface VouchMe extends BaseContract {
       TestimonialCreatedEvent.InputTuple,
       TestimonialCreatedEvent.OutputTuple,
       TestimonialCreatedEvent.OutputObject
+    >;
+
+    "TestimonialDeleted(uint256,address)": TypedContractEvent<
+      TestimonialDeletedEvent.InputTuple,
+      TestimonialDeletedEvent.OutputTuple,
+      TestimonialDeletedEvent.OutputObject
+    >;
+    TestimonialDeleted: TypedContractEvent<
+      TestimonialDeletedEvent.InputTuple,
+      TestimonialDeletedEvent.OutputTuple,
+      TestimonialDeletedEvent.OutputObject
+    >;
+
+    "TestimonialUpdated(address,address,uint256)": TypedContractEvent<
+      TestimonialUpdatedEvent.InputTuple,
+      TestimonialUpdatedEvent.OutputTuple,
+      TestimonialUpdatedEvent.OutputObject
+    >;
+    TestimonialUpdated: TypedContractEvent<
+      TestimonialUpdatedEvent.InputTuple,
+      TestimonialUpdatedEvent.OutputTuple,
+      TestimonialUpdatedEvent.OutputObject
     >;
 
     "TestimonialVerified(uint256,address)": TypedContractEvent<

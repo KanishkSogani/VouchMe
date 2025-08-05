@@ -28,13 +28,6 @@ import { useToast } from "@/hooks/useToast";
 import { useWaku } from "@/hooks/useWaku";
 import { TestimonialActionModal } from "@/components/ui/TestimonialActionModal";
 
-// Extend Window interface for pendingWakuTestimonialId
-declare global {
-  interface Window {
-    pendingWakuTestimonialId?: string | null;
-  }
-}
-
 interface Testimonial {
   content: string;
   fromAddress: string;
@@ -98,6 +91,9 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<"overview" | "received">(
     "overview"
   );
+  const [pendingWakuTestimonialId, setPendingWakuTestimonialId] = useState<
+    string | null
+  >(null);
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
 
   // Testimonial action modal state
@@ -602,12 +598,10 @@ export default function Dashboard() {
       setPendingTestimonial(null);
       setExistingTestimonial(null);
 
-      if (window.pendingWakuTestimonialId) {
-        removeTestimonial(window.pendingWakuTestimonialId);
-        window.pendingWakuTestimonialId = null;
-        showSuccess(
-          "Testimonial accepted and added to blockchain."
-        );
+      if (pendingWakuTestimonialId) {
+        removeTestimonial(pendingWakuTestimonialId);
+        setPendingWakuTestimonialId(null);
+        showSuccess("Testimonial accepted and added to blockchain.");
       }
     }
   };
@@ -619,8 +613,8 @@ export default function Dashboard() {
     setIsLoading(false);
 
     // Clean up pending Waku testimonial ID
-    if (window.pendingWakuTestimonialId) {
-      window.pendingWakuTestimonialId = null;
+    if (pendingWakuTestimonialId) {
+      setPendingWakuTestimonialId(null);
     }
   };
 
@@ -1259,8 +1253,7 @@ export default function Dashboard() {
                                   setShowDuplicateModal(true);
 
                                   // Store the waku testimonial ID for removal after acceptance
-                                  window.pendingWakuTestimonialId =
-                                    testimonial.id;
+                                  setPendingWakuTestimonialId(testimonial.id);
                                   return;
                                 }
 

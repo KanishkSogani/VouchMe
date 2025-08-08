@@ -5,6 +5,7 @@ import { useAccount, useChainId } from "wagmi";
 import { keccak256, encodePacked } from "viem";
 import { ethers } from "ethers";
 import { useToast } from "@/hooks/useToast";
+import { useWaku } from "@/hooks/useWaku";
 import { CONTRACT_ADDRESSES, VouchMeFactory } from "@/utils/contract";
 import {
   User,
@@ -15,6 +16,9 @@ import {
   Check,
   Mail,
   AlertTriangle,
+  Send,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 
 interface Profile {
@@ -27,6 +31,18 @@ export default function WritePage() {
   const { address: connectedAddress } = useAccount();
   const chainId = useChainId();
   const { showSuccess, showError } = useToast();
+  const {
+    isConnected: wakuConnected,
+    isConnecting: wakuConnecting,
+    sendTestimonial,
+    connectionError: wakuConnectionError,
+    reconnect: reconnectWaku,
+  } = useWaku();
+  console.log("Waku connection error:", wakuConnectionError);
+  console.log(
+    "Waku reconnect function available:",
+    typeof reconnectWaku === "function"
+  );
   const [content, setContent] = useState("");
   const [giverName, setGiverName] = useState("");
   const [profileUrl, setProfileUrl] = useState("");
@@ -40,6 +56,7 @@ export default function WritePage() {
   const [error, setError] = useState<string | null>(null);
   const [receiverProfile, setReceiverProfile] = useState<Profile | null>(null);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
+  const [sendMethod, setSendMethod] = useState<"waku" | "manual">("waku");
 
   // Extract address from query string and fetch profile
   useEffect(() => {
@@ -144,6 +161,44 @@ export default function WritePage() {
         signature,
       };
 
+      // Try to send via Waku first if connected
+      if (sendMethod === "waku" && wakuConnected) {
+        try {
+          console.log("📝 WRITE PAGE: Starting Waku testimonial send...");
+          await sendTestimonial({
+            senderAddress,
+            receiverAddress,
+            content,
+            giverName,
+            profileUrl: profileUrl || "",
+            signature,
+          });
+
+          console.log("📝 WRITE PAGE: ✅ Waku send completed successfully!");
+          showSuccess("Testimonial sent directly to recipient via Waku!");
+
+          // Clear form
+          setContent("");
+          setGiverName("");
+          setProfileUrl("");
+
+          // Reset loading state
+          setIsLoading(false);
+          console.log("📝 WRITE PAGE: ✅ Form cleared and loading reset");
+          return;
+        } catch (wakuError) {
+          console.error(
+            "📝 WRITE PAGE: ❌ Waku sending failed, falling back to manual:",
+            wakuError
+          );
+          showError(
+            "Failed to send via Waku, showing signed testimonial for manual sharing"
+          );
+          // Continue to manual fallback below
+        }
+      }
+
+      // Fallback to manual sharing
       setSignedMessage(JSON.stringify(signedMessageJson, null, 2));
       setContent("");
       setGiverName("");
@@ -316,6 +371,70 @@ export default function WritePage() {
               </div>
 
               <form onSubmit={handleCreateSignedMessage} className="space-y-6">
+                {/* Waku Status and Send Method Selector */}
+                <div className="bg-gray-800/30 rounded-xl p-4 border border-gray-700/30">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      {wakuConnected ? (
+                        <Wifi className="w-4 h-4 text-green-400" />
+                      ) : wakuConnecting ? (
+                        <div className="w-4 h-4 border-2 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin" />
+                      ) : (
+                        <WifiOff className="w-4 h-4 text-red-400" />
+                      )}
+                      <span className="text-sm font-medium text-gray-300">
+                        Waku Network:{" "}
+                        {wakuConnected
+                          ? "Connected"
+                          : wakuConnecting
+                          ? "Connecting..."
+                          : "Disconnected"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs text-gray-400 font-medium">
+                      Delivery Method
+                    </label>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setSendMethod("waku")}
+                        disabled={!wakuConnected}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                          sendMethod === "waku" && wakuConnected
+                            ? "bg-green-600/20 text-green-400 border border-green-500/30"
+                            : wakuConnected
+                            ? "bg-gray-700/50 text-gray-300 border border-gray-600/30 hover:bg-gray-700"
+                            : "bg-gray-700/30 text-gray-500 border border-gray-600/20 cursor-not-allowed"
+                        }`}
+                      >
+                        <Send className="w-3 h-3" />
+                        Direct Send
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSendMethod("manual")}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                          sendMethod === "manual"
+                            ? "bg-blue-600/20 text-blue-400 border border-blue-500/30"
+                            : "bg-gray-700/50 text-gray-300 border border-gray-600/30 hover:bg-gray-700"
+                        }`}
+                      >
+                        <Copy className="w-3 h-3" />
+                        Manual Share
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      {sendMethod === "waku"
+                        ? wakuConnected
+                          ? "Testimonial will be sent directly to the recipient via Waku network"
+                          : "Waku network connection required for direct sending"
+                        : "Generate signed testimonial for manual sharing"}
+                    </p>
+                  </div>
+                </div>
                 {/* Your Name Field */}
                 <div className="space-y-2">
                   <label
@@ -406,26 +525,39 @@ export default function WritePage() {
                     !content.trim() ||
                     !giverName.trim() ||
                     !isProfileComplete ||
-                    profileLoading
+                    profileLoading ||
+                    (sendMethod === "waku" && !wakuConnected)
                   }
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isLoading ? (
                     <div className="flex items-center justify-center gap-2">
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      Signing Testimonial...
+                      {sendMethod === "waku"
+                        ? "Sending via Waku..."
+                        : "Signing Testimonial..."}
                     </div>
                   ) : !isProfileComplete ? (
                     "Profile Incomplete - Cannot Create Testimonial"
+                  ) : sendMethod === "waku" && !wakuConnected ? (
+                    "Waku Disconnected - Switch to Manual"
+                  ) : sendMethod === "waku" ? (
+                    <>
+                      <Send className="w-4 h-4" />
+                      Send Testimonial Directly
+                    </>
                   ) : (
-                    "Sign Testimonial"
+                    <>
+                      <FileText className="w-4 h-4" />
+                      Sign Testimonial
+                    </>
                   )}
                 </button>
               </form>
             </div>
 
-            {/* Signed Message Output */}
-            {signedMessage && (
+            {/* Signed Message Output - Only show for manual mode */}
+            {signedMessage && sendMethod === "manual" && (
               <div className="bg-[#2a2a2a] rounded-2xl p-8 border border-gray-800 mt-8">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold text-white flex items-center gap-3">

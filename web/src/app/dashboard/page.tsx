@@ -28,6 +28,13 @@ import { useToast } from "@/hooks/useToast";
 import { useWaku } from "@/hooks/useWaku";
 import { TestimonialActionModal } from "@/components/ui/TestimonialActionModal";
 
+// Extend Window interface for pendingWakuTestimonialId
+declare global {
+  interface Window {
+    pendingWakuTestimonialId?: string | null;
+  }
+}
+
 interface Testimonial {
   content: string;
   fromAddress: string;
@@ -91,9 +98,6 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<"overview" | "received">(
     "overview"
   );
-  const [pendingWakuTestimonialId, setPendingWakuTestimonialId] = useState<
-    string | null
-  >(null);
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
 
   // Testimonial action modal state
@@ -117,16 +121,12 @@ export default function Dashboard() {
     isLoading: false,
   });
 
-  // Debug logging for received testimonials
   useEffect(() => {
-    console.log("🎛️ Dashboard: wakuTestimonials updated:", wakuTestimonials);
-    console.log(
-      "🎛️ Dashboard: wakuTestimonials count:",
-      wakuTestimonials.length
-    );
-    console.log("🎛️ Dashboard: wakuTestimonials array:", wakuTestimonials);
-    console.log("🎛️ Dashboard: wakuConnected:", wakuConnected);
-    console.log("🎛️ Dashboard: activeTab:", activeTab);
+    console.log("Dashboard: wakuTestimonials updated:", wakuTestimonials);
+    console.log("Dashboard: wakuTestimonials count:", wakuTestimonials.length);
+    console.log("Dashboard: wakuTestimonials array:", wakuTestimonials);
+    console.log("Dashboard: wakuConnected:", wakuConnected);
+    console.log("Dashboard: activeTab:", activeTab);
   }, [wakuTestimonials, wakuConnected, activeTab]);
 
   // Custom refresh handler that updates timestamp
@@ -174,9 +174,6 @@ export default function Dashboard() {
       };
     }
   };
-
-  // NOTE: Removed auto-processing of Waku testimonials
-  // They now appear in "Received Testimonials" tab for manual review
 
   const CONTRACT_ADDRESS =
     CONTRACT_ADDRESSES[chainId] || CONTRACT_ADDRESSES[534351];
@@ -598,10 +595,13 @@ export default function Dashboard() {
       setPendingTestimonial(null);
       setExistingTestimonial(null);
 
-      if (pendingWakuTestimonialId) {
-        removeTestimonial(pendingWakuTestimonialId);
-        setPendingWakuTestimonialId(null);
-        showSuccess("Testimonial accepted and added to blockchain.");
+      // If this came from Waku testimonial acceptance, remove it from pending list
+      if (window.pendingWakuTestimonialId) {
+        removeTestimonial(window.pendingWakuTestimonialId);
+        window.pendingWakuTestimonialId = null;
+        showSuccess(
+          "Testimonial accepted, added to blockchain, and removed from pending list"
+        );
       }
     }
   };
@@ -613,8 +613,8 @@ export default function Dashboard() {
     setIsLoading(false);
 
     // Clean up pending Waku testimonial ID
-    if (pendingWakuTestimonialId) {
-      setPendingWakuTestimonialId(null);
+    if (window.pendingWakuTestimonialId) {
+      window.pendingWakuTestimonialId = null;
     }
   };
 
@@ -1253,7 +1253,8 @@ export default function Dashboard() {
                                   setShowDuplicateModal(true);
 
                                   // Store the waku testimonial ID for removal after acceptance
-                                  setPendingWakuTestimonialId(testimonial.id);
+                                  window.pendingWakuTestimonialId =
+                                    testimonial.id;
                                   return;
                                 }
 

@@ -38,6 +38,7 @@ export default function WritePage() {
     connectionError: wakuConnectionError,
     reconnect: reconnectWaku,
   } = useWaku();
+  // TODO: Implement error display and manual reconnection in UI
   console.log("Waku connection error:", wakuConnectionError);
   console.log(
     "Waku reconnect function available:",

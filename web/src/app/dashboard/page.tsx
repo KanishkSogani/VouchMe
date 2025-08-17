@@ -19,6 +19,7 @@ import {
   Bell,
   MessageSquare,
   RefreshCw,
+  Trash2,
 } from "lucide-react";
 import { useAccount, useChainId } from "wagmi";
 import { ethers } from "ethers";
@@ -36,6 +37,7 @@ declare global {
 }
 
 interface Testimonial {
+  tokenId: number;
   content: string;
   fromAddress: string;
   giverName: string;
@@ -99,6 +101,17 @@ export default function Dashboard() {
     "overview"
   );
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
+
+  // Delete testimonial modal state
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    testimonial: Testimonial | null;
+    isLoading: boolean;
+  }>({
+    isOpen: false,
+    testimonial: null,
+    isLoading: false,
+  });
 
   // Testimonial action modal state
   const [actionModal, setActionModal] = useState<{
@@ -210,7 +223,8 @@ export default function Dashboard() {
           testimonialIds.map((id) => contract.getTestimonialDetails(id))
         );
 
-        const formattedTestimonials = details.map((detail) => ({
+        const formattedTestimonials = details.map((detail, index) => ({
+          tokenId: Number(testimonialIds[index]),
           content: detail.content,
           fromAddress: detail.sender,
           giverName: detail.giverName,
@@ -568,7 +582,8 @@ export default function Dashboard() {
             testimonialIds.map((id) => contract.getTestimonialDetails(id))
           );
 
-          const formattedTestimonials = details.map((detail) => ({
+          const formattedTestimonials = details.map((detail, index) => ({
+            tokenId: Number(testimonialIds[index]),
             content: detail.content,
             fromAddress: detail.sender,
             giverName: detail.giverName,
@@ -615,6 +630,44 @@ export default function Dashboard() {
     // Clean up pending Waku testimonial ID
     if (window.pendingWakuTestimonialId) {
       window.pendingWakuTestimonialId = null;
+    }
+  };
+
+  // Delete testimonial function
+  const handleDeleteTestimonial = async (testimonial: Testimonial) => {
+    try {
+      setDeleteModal((prev) => ({ ...prev, isLoading: true }));
+
+      const ethereum = window.ethereum;
+      if (!ethereum) {
+        throw new Error("MetaMask not found");
+      }
+
+      const provider = new ethers.BrowserProvider(ethereum);
+      const signer = await provider.getSigner();
+      const contract = VouchMeFactory.connect(CONTRACT_ADDRESS, signer);
+
+      // Call the deleteTestimonial function with the token ID
+      const tx = await contract.deleteTestimonial(testimonial.tokenId);
+      await tx.wait();
+
+      // Remove from local state
+      setTestimonials((prev) =>
+        prev.filter((t) => t.tokenId !== testimonial.tokenId)
+      );
+
+      // Close modal
+      setDeleteModal({
+        isOpen: false,
+        testimonial: null,
+        isLoading: false,
+      });
+
+      showSuccess("Testimonial deleted successfully");
+    } catch (error) {
+      console.error("Error deleting testimonial:", error);
+      showError("Failed to delete testimonial. Please try again.");
+      setDeleteModal((prev) => ({ ...prev, isLoading: false }));
     }
   };
 
@@ -936,9 +989,24 @@ export default function Dashboard() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 text-green-400 bg-green-500/10 px-3 py-1.5 rounded-full">
-                        <Shield size={14} />
-                        <span className="text-sm font-medium">Verified</span>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 text-green-400 bg-green-500/10 px-3 py-1.5 rounded-full">
+                          <Shield size={14} />
+                          <span className="text-sm font-medium">Verified</span>
+                        </div>
+                        <button
+                          onClick={() =>
+                            setDeleteModal({
+                              isOpen: true,
+                              testimonial: testimonial,
+                              isLoading: false,
+                            })
+                          }
+                          className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all hover:scale-105"
+                          title="Delete testimonial"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     </div>
 
@@ -1378,6 +1446,123 @@ export default function Dashboard() {
 
       {/* Profile Completion Modal */}
       <ProfileCompletionModal />
+
+      {/* Delete Testimonial Modal */}
+      {deleteModal.isOpen && deleteModal.testimonial && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#2a2a2a] rounded-2xl border border-[#3a3a3a] max-w-md w-full">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-[#3a3a3a]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
+                  <Trash2 size={20} className="text-red-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">
+                  Delete Testimonial
+                </h3>
+              </div>
+              <button
+                onClick={() =>
+                  setDeleteModal({
+                    isOpen: false,
+                    testimonial: null,
+                    isLoading: false,
+                  })
+                }
+                className="text-gray-400 hover:text-white transition-colors"
+                disabled={deleteModal.isLoading}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6">
+              <p className="text-gray-300 mb-4">
+                Are you sure you want to delete this testimonial from{" "}
+                <span className="font-semibold text-white">
+                  {deleteModal.testimonial.giverName || "Anonymous"}
+                </span>
+                ?
+              </p>
+
+              {/* Testimonial Preview */}
+              <div className="bg-[#1a1a1a] rounded-lg p-4 border border-[#3a3a3a] mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <User size={16} className="text-gray-400" />
+                  <span className="text-sm font-medium text-white">
+                    {deleteModal.testimonial.giverName || "Anonymous"}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-300 line-clamp-3">
+                  &ldquo;{deleteModal.testimonial.content}&rdquo;
+                </p>
+                <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                  <Calendar size={12} />
+                  <span>
+                    {new Date(
+                      deleteModal.testimonial.timestamp * 1000
+                    ).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-4">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-red-300 text-sm font-medium mb-1">
+                      Permanent Deletion
+                    </p>
+                    <p className="text-red-200 text-xs">
+                      This action cannot be undone. The testimonial will be
+                      permanently removed from the blockchain and cannot be
+                      recovered.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex gap-3 p-6 border-t border-[#3a3a3a]">
+              <button
+                onClick={() =>
+                  setDeleteModal({
+                    isOpen: false,
+                    testimonial: null,
+                    isLoading: false,
+                  })
+                }
+                disabled={deleteModal.isLoading}
+                className="flex-1 bg-[#3a3a3a] hover:bg-[#4a4a4a] text-white py-3 px-4 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() =>
+                  deleteModal.testimonial &&
+                  handleDeleteTestimonial(deleteModal.testimonial)
+                }
+                disabled={deleteModal.isLoading}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {deleteModal.isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    Delete Forever
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Testimonial Action Modal - Only for Reject */}
       <TestimonialActionModal

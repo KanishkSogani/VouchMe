@@ -700,9 +700,6 @@ class FixedWakuService {
     // Start live message listening for real-time testimonials
     this.startLiveMessageListening(address, handler);
 
-    // REMOVED: Automatic refresh that was causing multiple concurrent calls
-    // Manual refresh should be called explicitly by user interaction
-
     return () => {
       this.messageHandlers.delete(key);
       console.log(`Unregistered handler for ${address}`);

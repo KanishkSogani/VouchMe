@@ -326,9 +326,6 @@ export function useWaku(): UseWakuReturn {
 
           console.log("Handlers registered successfully");
 
-          // REMOVED: Automatic refresh causing stuck loading issue
-          // Only manual refresh should be used
-
           return () => {
             console.log(
               "Cleaning up UNIFORM Waku handlers for address:",
@@ -339,11 +336,8 @@ export function useWaku(): UseWakuReturn {
           };
           setTimeout(async () => {
             try {
-              console.log(
-                "🔧 AUTO-REFRESH: Starting automatic testimonial query"
-              );
+              console.log("Starting automatic testimonial query");
 
-              // Call refresh logic directly without using the callback to avoid dependency issues
               if (!address) return;
 
               console.log("Auto-refresh starting for address:", address);
@@ -353,22 +347,16 @@ export function useWaku(): UseWakuReturn {
                 // Import the corrected service directly
                 const { wakuService } = await import("../services/wakuService");
 
-                // Use the bulletproof manual refresh method
-                console.log(
-                  "🔄 AUTO-REFRESH: Calling manualRefreshTestimonials"
-                );
+                console.log("Calling manualRefreshTestimonials");
                 const testimonials =
                   await wakuService.manualRefreshTestimonials(address);
 
                 console.log(
-                  `✅ AUTO-REFRESH: Successfully fetched ${testimonials.length} testimonials`
+                  `Successfully fetched ${testimonials.length} testimonials`
                 );
 
-                // Force update the state directly
                 if (testimonials.length > 0) {
-                  console.log(
-                    "� AUTO-REFRESH: Updating React state with testimonials"
-                  );
+                  console.log("Updating React state with testimonials");
                   setReceivedTestimonials(testimonials);
                   showSuccess(
                     `Auto-refresh complete! Found ${testimonials.length} testimonials`

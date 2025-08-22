@@ -1127,7 +1127,7 @@ export default function Dashboard() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                   {/* Share Links Card */}
-                  <div className="bg-gradient-to-br from-[#2a2a2a] to-[#252525] rounded-xl border border-[#3a3a3a] p-6">
+                  <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-6 hover:border-indigo-500/50 transition-colors">
                     <div className="flex items-center gap-3 mb-6">
                       <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
                         <ExternalLink className="w-5 h-5 text-blue-400" />
@@ -1234,7 +1234,7 @@ export default function Dashboard() {
                   </div>
 
                   {/* Add Testimonial Card */}
-                  <div className="bg-gradient-to-br from-[#2a2a2a] to-[#252525] rounded-xl border border-[#3a3a3a] p-6">
+                  <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-6 hover:border-green-500/50 transition-colors">
                     <div className="flex items-center gap-3 mb-6">
                       <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
                         <FileText className="w-5 h-5 text-green-400" />
@@ -1274,7 +1274,7 @@ export default function Dashboard() {
                       <button
                         type="submit"
                         disabled={isLoading || !newTestimonial.trim()}
-                        className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-700 text-white px-6 py-4 rounded-lg font-medium transition-all hover:scale-105 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg"
+                        className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white px-6 py-4 rounded-lg font-medium transition-all hover:scale-105 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-md"
                       >
                         {isLoading ? (
                           <div className="flex items-center justify-center gap-2">
@@ -1303,9 +1303,9 @@ export default function Dashboard() {
               </div>
 
               {/* My Testimonials Section */}
-              <div className="bg-gradient-to-br from-[#2a2a2a] to-[#252525] rounded-xl border border-[#3a3a3a] overflow-hidden">
+              <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] overflow-hidden">
                 {/* Section Header */}
-                <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border-b border-[#3a3a3a] p-6">
+                <div className="bg-[#1f1f1f] border-b border-[#3a3a3a] p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-2xl font-bold text-white mb-2">
@@ -1334,18 +1334,15 @@ export default function Dashboard() {
                       {testimonials.map((testimonial, index) => (
                         <div
                           key={index}
-                          className="bg-[#1f1f1f] rounded-xl p-6 border border-[#3a3a3a] hover:border-indigo-500/30 transition-all duration-300 fade-in group relative overflow-hidden"
+                          className="bg-[#1f1f1f] rounded-xl p-6 border border-[#3a3a3a] hover:border-indigo-500/50 transition-all duration-200 fade-in"
                           style={{ animationDelay: `${index * 100}ms` }}
                         >
-                          {/* Hover gradient */}
-                          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                          <div className="relative z-10">
+                          <div>
                             {/* Header */}
                             <div className="flex items-start justify-between mb-4">
                               <div className="flex items-center gap-4">
                                 <div className="relative">
-                                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                                  <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center shadow-md">
                                     <User size={20} className="text-white" />
                                   </div>
                                   <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center border-2 border-[#1f1f1f]">
@@ -1412,7 +1409,7 @@ export default function Dashboard() {
                             {/* Content */}
                             <div className="mb-4">
                               <div className="bg-[#2a2a2a] rounded-lg p-4 border-l-4 border-indigo-500">
-                                <p className="text-gray-200 leading-relaxed text-lg italic">
+                                <p className="text-gray-200 leading-relaxed text-lg">
                                   &ldquo;{testimonial.content}&rdquo;
                                 </p>
                               </div>
@@ -1443,7 +1440,7 @@ export default function Dashboard() {
                     </div>
                   ) : (
                     <div className="text-center py-12">
-                      <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                      <div className="w-20 h-20 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-md">
                         <MessageSquare className="w-10 h-10 text-white" />
                       </div>
                       <h3 className="text-xl font-bold text-white mb-3">
@@ -1455,7 +1452,7 @@ export default function Dashboard() {
                       </p>
                       <button
                         onClick={copyLink}
-                        className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-medium transition-all hover:scale-105 shadow-lg"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-medium transition-all hover:scale-105 shadow-md"
                       >
                         <div className="flex items-center gap-2">
                           <Copy className="w-4 h-4" />
@@ -1778,7 +1775,7 @@ export default function Dashboard() {
                                   isLoading: false,
                                 });
                               }}
-                              className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                              className="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 shadow-md flex items-center justify-center gap-2"
                             >
                               <X size={16} />
                               Reject
@@ -1858,12 +1855,12 @@ export default function Dashboard() {
           {activeView === "profile" && (
             <div>
               {/* Profile Card */}
-              <div className="bg-gradient-to-br from-[#2a2a2a] to-[#252525] rounded-xl border border-[#3a3a3a] overflow-hidden">
+              <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] overflow-hidden">
                 {/* Profile Header */}
-                <div className="bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border-b border-[#3a3a3a] p-6">
+                <div className="bg-[#1f1f1f] border-b border-[#3a3a3a] p-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <div className="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center shadow-md">
                         <User className="w-8 h-8 text-white" />
                       </div>
                       <div>
@@ -2070,7 +2067,7 @@ export default function Dashboard() {
               </div>
 
               {/* Profile Tips */}
-              <div className="bg-gradient-to-br from-[#2a2a2a] to-[#252525] rounded-xl border border-[#3a3a3a] p-6 mt-6">
+              <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-6 mt-6">
                 <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                   <FileText className="w-5 h-5 text-indigo-500" />
                   Profile Tips

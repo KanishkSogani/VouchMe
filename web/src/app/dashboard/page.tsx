@@ -1050,6 +1050,8 @@ export default function Dashboard() {
                   className={`rounded-xl p-6 text-white relative overflow-hidden ${
                     wakuConnected
                       ? "bg-gradient-to-br from-green-500 to-emerald-600"
+                      : wakuConnecting
+                      ? "bg-gradient-to-br from-amber-500 to-orange-600"
                       : "bg-gradient-to-br from-red-500 to-red-600"
                   }`}
                 >
@@ -1059,22 +1061,36 @@ export default function Dashboard() {
                       <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
                         {wakuConnected ? (
                           <Wifi className="w-6 h-6" />
+                        ) : wakuConnecting ? (
+                          <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         ) : (
                           <WifiOff className="w-6 h-6" />
                         )}
                       </div>
                       <div
                         className={`w-3 h-3 rounded-full ${
-                          wakuConnected ? "bg-green-200" : "bg-red-200"
-                        } ${wakuConnected ? "animate-pulse" : ""}`}
+                          wakuConnected
+                            ? "bg-green-200 animate-pulse"
+                            : wakuConnecting
+                            ? "bg-amber-200 animate-pulse"
+                            : "bg-red-200"
+                        }`}
                       />
                     </div>
                     <div className="text-lg font-bold mb-1">
-                      {wakuConnected ? "Connected" : "Offline"}
+                      {wakuConnected
+                        ? "Connected"
+                        : wakuConnecting
+                        ? "Connecting..."
+                        : "Offline"}
                     </div>
                     <div
                       className={`text-sm font-medium ${
-                        wakuConnected ? "text-green-100" : "text-red-100"
+                        wakuConnecting
+                          ? "text-amber-100"
+                          : wakuConnected
+                          ? "text-green-100"
+                          : "text-red-100"
                       }`}
                     >
                       Waku Network
@@ -1247,12 +1263,6 @@ export default function Dashboard() {
                           Manually add signed testimonials
                         </p>
                       </div>
-                      {wakuConnected && (
-                        <div className="ml-auto flex items-center gap-2 text-green-400 bg-green-500/10 px-3 py-1.5 rounded-full">
-                          <Wifi className="w-3 h-3" />
-                          <span className="text-xs font-medium">Auto-sync</span>
-                        </div>
-                      )}
                     </div>
 
                     <form onSubmit={handleAddTestimonial} className="space-y-4">
@@ -1469,196 +1479,123 @@ export default function Dashboard() {
           {/* Received Testimonials View */}
           {activeView === "received" && (
             <div>
-              {/* Stats Bar */}
-              {wakuTestimonials.length > 0 && (
-                <div className="bg-[#2a2a2a] rounded-xl p-4 border border-[#3a3a3a] mb-8">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-indigo-400">
-                          {wakuTestimonials.length}
-                        </div>
-                        <div className="text-xs text-gray-500">Pending</div>
+              {/* Header Stats */}
+              <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-6 mb-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-amber-400">
+                        {wakuTestimonials.length}
                       </div>
-                      <div className="h-10 w-px bg-[#3a3a3a]"></div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-400">
-                          {testimonials.length}
-                        </div>
-                        <div className="text-xs text-gray-500">Accepted</div>
-                      </div>
+                      <div className="text-sm text-gray-400">Pending</div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      {/* Refresh Button */}
-                      <button
-                        onClick={handleRefresh}
-                        disabled={isRefreshing || !wakuConnected}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                          isRefreshing || !wakuConnected
-                            ? "bg-gray-600/20 text-gray-500 cursor-not-allowed"
-                            : "bg-indigo-600 hover:bg-indigo-700 text-white hover:scale-105 shadow-lg"
-                        }`}
-                        title={
-                          !wakuConnected
-                            ? "Connect to Waku network first"
-                            : "Refresh testimonials from Waku Store"
-                        }
-                      >
-                        <RefreshCw
-                          className={`w-4 h-4 ${
-                            isRefreshing ? "animate-spin" : ""
-                          }`}
-                        />
-                        <span className="hidden sm:inline">
-                          {isRefreshing ? "Refreshing..." : "Refresh"}
-                        </span>
-                      </button>
+                    <div className="h-12 w-px bg-[#3a3a3a]"></div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-green-400">
+                        {testimonials.length}
+                      </div>
+                      <div className="text-sm text-gray-400">Approved</div>
+                    </div>
+                  </div>
 
-                      {/* Connection Status Badge */}
-                      <div
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${
-                          wakuConnected
-                            ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                            : "bg-red-500/10 text-red-400 border border-red-500/20"
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={handleRefresh}
+                      disabled={
+                        isRefreshing || (wakuConnecting && !wakuConnected)
+                      }
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                        isRefreshing || (wakuConnecting && !wakuConnected)
+                          ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
+                          : "bg-indigo-600 hover:bg-indigo-700 text-white hover:scale-105"
+                      }`}
+                    >
+                      <RefreshCw
+                        className={`w-4 h-4 ${
+                          isRefreshing ? "animate-spin" : ""
                         }`}
-                      >
-                        {wakuConnected ? (
-                          <Wifi className="w-4 h-4" />
-                        ) : (
-                          <WifiOff className="w-4 h-4" />
-                        )}
-                        <span className="hidden md:inline">
-                          {wakuConnected ? "Connected" : "Disconnected"}
-                        </span>
-                      </div>
+                      />
+                      {isRefreshing ? "Syncing..." : "Refresh"}
+                    </button>
+
+                    <div
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${
+                        wakuConnected
+                          ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                          : wakuConnecting
+                          ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                          : "bg-red-500/20 text-red-400 border border-red-500/30"
+                      }`}
+                    >
+                      {wakuConnected ? (
+                        <Wifi className="w-4 h-4" />
+                      ) : wakuConnecting ? (
+                        <div className="w-4 h-4 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin" />
+                      ) : (
+                        <WifiOff className="w-4 h-4" />
+                      )}
+                      {wakuConnected
+                        ? "Connected"
+                        : wakuConnecting
+                        ? "Connecting..."
+                        : "Offline"}
                     </div>
-                    {lastRefreshed && (
-                      <div className="text-right">
-                        <div className="text-xs text-gray-500">
-                          Last updated
-                        </div>
-                        <div className="text-sm text-gray-400">
-                          {lastRefreshed.toLocaleTimeString()}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
-              )}
+              </div>
 
               {/* Loading State */}
               {isRefreshing && (
-                <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-xl p-8 mb-6 border border-indigo-500/20">
-                  <div className="flex flex-col items-center justify-center gap-4">
-                    <div className="relative">
-                      <div className="w-12 h-12 border-4 border-indigo-400/30 border-t-indigo-400 rounded-full animate-spin" />
-                      <div
-                        className="absolute inset-0 w-12 h-12 border-4 border-transparent border-r-purple-400 rounded-full animate-spin"
-                        style={{
-                          animationDirection: "reverse",
-                          animationDuration: "1.5s",
-                        }}
-                      />
-                    </div>
+                <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-8 mb-6">
+                  <div className="flex items-center justify-center gap-4">
+                    <div className="w-8 h-8 border-4 border-indigo-400/30 border-t-indigo-400 rounded-full animate-spin" />
                     <div className="text-center">
-                      <div className="text-lg font-semibold text-white mb-1">
+                      <div className="text-lg font-semibold text-white">
                         Syncing with Waku Network
                       </div>
                       <div className="text-sm text-gray-400">
-                        Fetching your latest testimonials from decentralized
-                        storage...
+                        Fetching latest testimonials...
                       </div>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Empty State */}
+              {/* Content */}
               {wakuTestimonials.length === 0 && !isRefreshing ? (
-                <div className="bg-gradient-to-br from-[#2a2a2a] to-[#1f1f1f] rounded-2xl p-12 text-center border border-[#3a3a3a] relative overflow-hidden">
-                  {/* Background decoration */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5" />
-                  <div className="absolute top-4 right-4 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-full blur-3xl" />
-                  <div className="absolute bottom-4 left-4 w-24 h-24 bg-gradient-to-br from-blue-500/10 to-teal-500/10 rounded-full blur-2xl" />
-
-                  <div className="relative z-10">
-                    {/* Icon */}
-                    <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                      <MessageSquare className="w-10 h-10 text-white" />
-                    </div>
-
-                    {/* Content */}
-                    <h3 className="text-2xl font-bold text-white mb-3">
-                      No testimonials yet
-                    </h3>
-                    <p className="text-gray-400 mb-6 max-w-md mx-auto leading-relaxed">
-                      When someone sends you a testimonial via Waku&apos;s
-                      decentralized network, it will appear here for your review
-                      and approval.
-                    </p>
-
-                    {/* Feature highlight */}
-                    <div className="bg-[#3a3a3a]/50 backdrop-blur-sm rounded-xl p-6 mb-6 max-w-lg mx-auto border border-[#4a4a4a]">
-                      <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                          <span className="text-white text-lg">🌐</span>
-                        </div>
-                        <div className="text-left">
-                          <h4 className="text-white font-semibold mb-2">
-                            Decentralized & Private
-                          </h4>
-                          <p className="text-gray-400 text-sm leading-relaxed">
-                            Testimonials are delivered through Waku&apos;s
-                            peer-to-peer network, ensuring privacy and
-                            censorship resistance.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Connection status */}
-                    <div className="flex items-center justify-center gap-3">
-                      {wakuConnected ? (
-                        <>
-                          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                          <span className="text-green-400 text-sm font-medium">
-                            Connected and listening for testimonials
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <div className="w-2 h-2 bg-red-400 rounded-full" />
-                          <span className="text-red-400 text-sm font-medium">
-                            Disconnected from Waku network
-                          </span>
-                        </>
-                      )}
-                    </div>
-
-                    {/* Manual refresh option */}
-                    {wakuConnected && (
-                      <div className="mt-8 pt-6 border-t border-[#3a3a3a]">
-                        <button
-                          onClick={handleRefresh}
-                          disabled={isRefreshing}
-                          className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-medium transition-all hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                        >
-                          <div className="flex items-center gap-2">
-                            <RefreshCw
-                              className={`w-4 h-4 ${
-                                isRefreshing ? "animate-spin" : ""
-                              }`}
-                            />
-                            {isRefreshing
-                              ? "Checking Waku Store..."
-                              : "Check for Testimonials"}
-                          </div>
-                        </button>
-                        <p className="text-xs text-gray-500 mt-3">
-                          Manually query the decentralized store for
-                          testimonials
-                        </p>
-                      </div>
+                <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-12 text-center">
+                  <div className="w-20 h-20 bg-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-6">
+                    <MessageSquare className="w-10 h-10 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-3">
+                    No pending testimonials
+                  </h3>
+                  <p className="text-gray-400 mb-6 max-w-md mx-auto">
+                    When someone sends you a testimonial via Waku network, it
+                    will appear here for review.
+                  </p>
+                  <div className="flex items-center justify-center gap-3 text-sm">
+                    {wakuConnected ? (
+                      <>
+                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                        <span className="text-green-400 font-medium">
+                          Connected and listening
+                        </span>
+                      </>
+                    ) : wakuConnecting ? (
+                      <>
+                        <div className="w-2 h-2 border border-amber-400/30 border-t-amber-400 rounded-full animate-spin" />
+                        <span className="text-amber-400 font-medium">
+                          Connecting to network...
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-2 h-2 bg-red-400 rounded-full" />
+                        <span className="text-red-400 font-medium">
+                          Connection required
+                        </span>
+                      </>
                     )}
                   </div>
                 </div>
@@ -1679,139 +1616,90 @@ export default function Dashboard() {
                   )}
 
                   {/* Testimonials Grid */}
-                  <div className="space-y-6">
-                    {wakuTestimonials.map((testimonial, index) => (
+                  <div className="space-y-4">
+                    {wakuTestimonials.map((testimonial) => (
                       <div
                         key={testimonial.id}
-                        className="bg-gradient-to-br from-[#2a2a2a] to-[#252525] rounded-xl p-6 border border-[#3a3a3a] hover:border-indigo-500/30 transition-all duration-300 fade-in group relative overflow-hidden"
-                        style={{ animationDelay: `${index * 100}ms` }}
+                        className="bg-[#2a2a2a] rounded-lg p-6 border border-[#3a3a3a] hover:border-[#4a4a4a] transition-colors"
                       >
-                        {/* Hover effect background */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                        <div className="relative z-10">
-                          {/* Header */}
-                          <div className="flex items-start justify-between mb-6">
-                            <div className="flex items-center gap-4">
-                              <div className="relative">
-                                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
-                                  <User size={24} className="text-white" />
-                                </div>
-                                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-amber-400 rounded-full flex items-center justify-center">
-                                  <MessageSquare
-                                    size={10}
-                                    className="text-white"
-                                  />
-                                </div>
-                              </div>
-                              <div>
-                                <h3 className="font-bold text-white text-xl mb-1">
-                                  {testimonial.giverName || "Anonymous User"}
-                                </h3>
-                                <div className="flex items-center gap-3 text-sm">
-                                  <span className="font-mono text-gray-400 bg-[#3a3a3a] px-2 py-1 rounded-md">
-                                    {truncateText(testimonial.senderAddress)}
-                                  </span>
-                                  <span className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-400 px-3 py-1 rounded-full text-xs font-semibold border border-amber-500/30">
-                                    Pending Review
-                                  </span>
-                                </div>
-                              </div>
+                        {/* Header */}
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-[#3a3a3a] flex items-center justify-center">
+                              <User size={18} className="text-gray-300" />
                             </div>
-                            <div className="text-right">
-                              <div className="text-sm font-medium text-gray-300">
-                                {new Date(
-                                  testimonial.timestamp
-                                ).toLocaleDateString()}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {new Date(
-                                  testimonial.timestamp
-                                ).toLocaleTimeString()}
-                              </div>
+                            <div>
+                              <h3 className="font-semibold text-white">
+                                {testimonial.giverName || "Anonymous User"}
+                              </h3>
+                              <span className="text-xs text-gray-400 font-mono bg-[#1f1f1f] px-2 py-1 rounded">
+                                {truncateText(testimonial.senderAddress)}
+                              </span>
                             </div>
                           </div>
-
-                          {/* Content */}
-                          <div className="mb-6">
-                            <div className="bg-[#1f1f1f] rounded-lg p-4 border-l-4 border-indigo-500">
-                              <p className="text-gray-200 leading-relaxed text-lg italic">
-                                &ldquo;{testimonial.content}&rdquo;
-                              </p>
+                          <div className="text-right">
+                            <span className="text-xs text-orange-400 bg-orange-500/10 px-2 py-1 rounded border border-orange-500/20">
+                              Pending
+                            </span>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {new Date(
+                                testimonial.timestamp
+                              ).toLocaleDateString()}
                             </div>
                           </div>
+                        </div>
 
-                          {/* Profile URL if available */}
-                          {testimonial.profileUrl && (
-                            <div className="mb-6">
-                              <a
-                                href={testimonial.profileUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm transition-colors bg-blue-500/10 px-3 py-2 rounded-lg border border-blue-500/20 hover:border-blue-400/40"
-                              >
-                                <ExternalLink size={14} />
-                                View {testimonial.giverName}&apos;s Profile
-                              </a>
-                            </div>
-                          )}
+                        {/* Content */}
+                        <div className="mb-4">
+                          <p className="text-gray-200 leading-relaxed">
+                            &ldquo;{testimonial.content}&rdquo;
+                          </p>
+                        </div>
 
-                          {/* Metadata */}
-                          <div className="flex items-center gap-2 text-sm text-gray-400 mb-6 bg-[#1f1f1f] px-3 py-2 rounded-lg">
-                            <MessageSquare size={14} />
-                            <span>Received via Waku Network</span>
-                            <div className="w-1 h-1 bg-gray-500 rounded-full" />
-                            <span>Awaiting your decision</span>
-                          </div>
-
-                          {/* Action Buttons */}
-                          <div className="flex items-center gap-3 pt-4 border-t border-[#3a3a3a]">
-                            <button
-                              onClick={() => {
-                                setActionModal({
-                                  isOpen: true,
-                                  action: "reject",
-                                  testimonial: testimonial,
-                                  isLoading: false,
-                                });
-                              }}
-                              className="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 shadow-md flex items-center justify-center gap-2"
+                        {/* Profile URL if available */}
+                        {testimonial.profileUrl && (
+                          <div className="mb-4">
+                            <a
+                              href={testimonial.profileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm"
                             >
-                              <X size={16} />
-                              Reject
-                            </button>
-                            <button
-                              onClick={async () => {
-                                try {
-                                  // Check for existing testimonial from same sender
-                                  const existingFromSender = testimonials.find(
-                                    (t) =>
-                                      t.fromAddress.toLowerCase() ===
-                                      testimonial.senderAddress.toLowerCase()
-                                  );
+                              <ExternalLink size={14} />
+                              View Profile
+                            </a>
+                          </div>
+                        )}
 
-                                  if (existingFromSender) {
-                                    // Show duplicate confirmation modal
-                                    setPendingTestimonial({
-                                      senderAddress: testimonial.senderAddress,
-                                      receiverAddress:
-                                        testimonial.receiverAddress,
-                                      content: testimonial.content,
-                                      giverName: testimonial.giverName,
-                                      profileUrl: testimonial.profileUrl,
-                                      signature: testimonial.signature,
-                                    });
-                                    setExistingTestimonial(existingFromSender);
-                                    setShowDuplicateModal(true);
+                        {/* Action Buttons */}
+                        <div className="flex items-center gap-3 pt-4 border-t border-[#3a3a3a]">
+                          <button
+                            onClick={() => {
+                              setActionModal({
+                                isOpen: true,
+                                action: "reject",
+                                testimonial: testimonial,
+                                isLoading: false,
+                              });
+                            }}
+                            className="flex-1 bg-[#3a3a3a] hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                          >
+                            <X size={16} />
+                            Reject
+                          </button>
+                          <button
+                            onClick={async () => {
+                              try {
+                                // Check for existing testimonial from same sender
+                                const existingFromSender = testimonials.find(
+                                  (t) =>
+                                    t.fromAddress.toLowerCase() ===
+                                    testimonial.senderAddress.toLowerCase()
+                                );
 
-                                    // Store the waku testimonial ID for removal after acceptance
-                                    window.pendingWakuTestimonialId =
-                                      testimonial.id;
-                                    return;
-                                  }
-
-                                  // No duplicate, proceed directly
-                                  await addTestimonialToBlockchain({
+                                if (existingFromSender) {
+                                  // Show duplicate confirmation modal
+                                  setPendingTestimonial({
                                     senderAddress: testimonial.senderAddress,
                                     receiverAddress:
                                       testimonial.receiverAddress,
@@ -1820,28 +1708,45 @@ export default function Dashboard() {
                                     profileUrl: testimonial.profileUrl,
                                     signature: testimonial.signature,
                                   });
+                                  setExistingTestimonial(existingFromSender);
+                                  setShowDuplicateModal(true);
 
-                                  // Remove from pending list after successful blockchain addition
-                                  removeTestimonial(testimonial.id);
-                                  showSuccess(
-                                    "Testimonial accepted and added to blockchain"
-                                  );
-                                } catch (error) {
-                                  console.error(
-                                    "Failed to accept testimonial:",
-                                    error
-                                  );
-                                  showError(
-                                    "Failed to accept testimonial. Please try again."
-                                  );
+                                  // Store the waku testimonial ID for removal after acceptance
+                                  window.pendingWakuTestimonialId =
+                                    testimonial.id;
+                                  return;
                                 }
-                              }}
-                              className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 shadow-lg flex items-center justify-center gap-2"
-                            >
-                              <CheckCircle size={16} />
-                              Accept & Add to Blockchain
-                            </button>
-                          </div>
+
+                                // No duplicate, proceed directly
+                                await addTestimonialToBlockchain({
+                                  senderAddress: testimonial.senderAddress,
+                                  receiverAddress: testimonial.receiverAddress,
+                                  content: testimonial.content,
+                                  giverName: testimonial.giverName,
+                                  profileUrl: testimonial.profileUrl,
+                                  signature: testimonial.signature,
+                                });
+
+                                // Remove from pending list after successful blockchain addition
+                                removeTestimonial(testimonial.id);
+                                showSuccess(
+                                  "Testimonial accepted and added to blockchain"
+                                );
+                              } catch (error) {
+                                console.error(
+                                  "Failed to accept testimonial:",
+                                  error
+                                );
+                                showError(
+                                  "Failed to accept testimonial. Please try again."
+                                );
+                              }
+                            }}
+                            className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                          >
+                            <CheckCircle size={16} />
+                            Accept
+                          </button>
                         </div>
                       </div>
                     ))}

@@ -450,14 +450,9 @@ export function useWaku(): UseWakuReturn {
 
         console.log("Starting Promise.race with 60s timeout...");
         await Promise.race([sendPromise, timeoutPromise]);
-        console.log(
-          "🎯 ✅ wakuService.sendTestimonial completed successfully!"
-        );
+        console.log("wakuService.sendTestimonial completed successfully!");
 
-        // Don't show success toast here - let the write page handle it
-        console.log(
-          "🎯 ✅ Testimonial sent successfully, returning to write page"
-        );
+        console.log("Testimonial sent successfully, returning to write page");
       } catch (error) {
         console.error("Failed to send testimonial:", error);
         const errorMessage =
@@ -577,7 +572,7 @@ export function useWaku(): UseWakuReturn {
       } else if (errorMessage.includes("Node not available")) {
         showError("Waku node issue. Please wait for connection and try again.");
       } else {
-        showError(`query failed: ${errorMessage}`);
+        showError(`${errorMessage}`);
       }
     } finally {
       setIsRefreshing(false);

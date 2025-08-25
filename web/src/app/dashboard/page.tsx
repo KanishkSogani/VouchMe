@@ -23,7 +23,9 @@ import {
   LayoutDashboard,
   Users,
   Save,
-  Edit3,
+  Share2,
+  Linkedin,
+  Send,
 } from "lucide-react";
 import { useAccount, useChainId } from "wagmi";
 import { ethers } from "ethers";
@@ -152,6 +154,10 @@ export default function Dashboard() {
     testimonial: null,
     isLoading: false,
   });
+
+  // Share dropdown states
+  const [showCollectionShareMenu, setShowCollectionShareMenu] = useState(false);
+  const [showShowcaseShareMenu, setShowShowcaseShareMenu] = useState(false);
 
   useEffect(() => {
     console.log("Dashboard: wakuTestimonials updated:", wakuTestimonials);
@@ -745,6 +751,35 @@ export default function Dashboard() {
     setTimeout(() => setShowcaseCopied(false), 2000);
   };
 
+  // Social media sharing functions
+  const shareOnX = (url: string, text: string) => {
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+      text
+    )}&url=${encodeURIComponent(url)}`;
+    window.open(twitterUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const shareOnLinkedIn = (url: string, title: string) => {
+    const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+      url
+    )}`;
+    window.open(linkedInUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const shareOnWhatsApp = (url: string, text: string) => {
+    const whatsAppUrl = `https://wa.me/?text=${encodeURIComponent(
+      `${text} ${url}`
+    )}`;
+    window.open(whatsAppUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const shareViaEmail = (url: string, subject: string, body: string) => {
+    const emailUrl = `mailto:?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(`${body}\n\n${url}`)}`;
+    window.open(emailUrl);
+  };
+
   // loading skeleton for testimonials
   const TestimonialsSkeleton = () => (
     <>
@@ -1188,9 +1223,97 @@ export default function Dashboard() {
                             </button>
                           </div>
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">
-                          Share this link to collect testimonials from others
-                        </p>
+                        <div className="flex items-center justify-between mt-2">
+                          <p className="text-xs text-gray-500">
+                            Share this link to collect testimonials from others
+                          </p>
+                          <div className="relative">
+                            <button
+                              onClick={() =>
+                                setShowCollectionShareMenu(
+                                  !showCollectionShareMenu
+                                )
+                              }
+                              className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors"
+                            >
+                              <Share2 size={12} />
+                              Share
+                            </button>
+                            {showCollectionShareMenu && (
+                              <div className="absolute right-0 top-8 bg-[#2a2a2a] border border-[#3a3a3a] rounded-lg shadow-lg z-10 p-3 min-w-[160px]">
+                                <div className="flex items-center justify-center gap-4">
+                                  <button
+                                    onClick={() => {
+                                      shareOnX(
+                                        shareableLink,
+                                        "🌟 Help me build my reputation! Share your experience working with me:"
+                                      );
+                                      setShowCollectionShareMenu(false);
+                                    }}
+                                    className="flex items-center justify-center p-3 rounded-lg bg-black/20 hover:bg-black/40 transition-all duration-200 hover:scale-110"
+                                    title="Share on X"
+                                  >
+                                    <svg
+                                      width="18"
+                                      height="18"
+                                      viewBox="0 0 24 24"
+                                      fill="currentColor"
+                                      className="text-white"
+                                    >
+                                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                                    </svg>
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      shareOnLinkedIn(
+                                        shareableLink,
+                                        "Professional Testimonial Collection"
+                                      );
+                                      setShowCollectionShareMenu(false);
+                                    }}
+                                    className="flex items-center justify-center p-3 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 transition-all duration-200 hover:scale-110"
+                                    title="Share on LinkedIn"
+                                  >
+                                    <Linkedin
+                                      size={18}
+                                      className="text-blue-400"
+                                    />
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      shareOnWhatsApp(
+                                        shareableLink,
+                                        "Hi! I'd love to get your feedback about our collaboration. You can share your testimonial here:"
+                                      );
+                                      setShowCollectionShareMenu(false);
+                                    }}
+                                    className="flex items-center justify-center p-3 rounded-lg bg-green-500/20 hover:bg-green-500/40 transition-all duration-200 hover:scale-110"
+                                    title="Share on WhatsApp"
+                                  >
+                                    <Send
+                                      size={18}
+                                      className="text-green-400"
+                                    />
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      shareViaEmail(
+                                        shareableLink,
+                                        "Request for Professional Testimonial",
+                                        "Hi,\n\nI hope you're doing well! I'd really appreciate if you could share a testimonial about our professional collaboration.\n\nYou can easily submit your testimonial using this secure link:"
+                                      );
+                                      setShowCollectionShareMenu(false);
+                                    }}
+                                    className="flex items-center justify-center p-3 rounded-lg bg-gray-500/20 hover:bg-gray-500/40 transition-all duration-200 hover:scale-110"
+                                    title="Share via Email"
+                                  >
+                                    <Mail size={18} className="text-gray-400" />
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
 
                       {/* Showcase Link */}
@@ -1224,27 +1347,96 @@ export default function Dashboard() {
                             </button>
                           </div>
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">
-                          Share this link to showcase your testimonials publicly
-                        </p>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex gap-3 pt-4 border-t border-[#3a3a3a]">
-                        <button
-                          onClick={() => setActiveView("profile")}
-                          className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg font-medium transition-colors text-sm flex items-center justify-center gap-2"
-                        >
-                          <User size={16} />
-                          Edit Profile
-                        </button>
-                        <Link
-                          href={`/testimonials?address=${address}`}
-                          className="flex-1 bg-teal-600 hover:bg-teal-700 text-white px-4 py-3 rounded-lg font-medium transition-colors text-sm text-center flex items-center justify-center gap-2"
-                        >
-                          <ExternalLink size={16} />
-                          View Showcase
-                        </Link>
+                        <div className="flex items-center justify-between mt-2">
+                          <p className="text-xs text-gray-500">
+                            Share this link to showcase your testimonials
+                            publicly
+                          </p>
+                          <div className="relative">
+                            <button
+                              onClick={() =>
+                                setShowShowcaseShareMenu(!showShowcaseShareMenu)
+                              }
+                              className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-teal-500/10 text-teal-400 hover:bg-teal-500/20 transition-colors"
+                            >
+                              <Share2 size={12} />
+                              Share
+                            </button>
+                            {showShowcaseShareMenu && (
+                              <div className="absolute right-0 top-8 bg-[#2a2a2a] border border-[#3a3a3a] rounded-lg shadow-lg z-10 p-3 min-w-[160px]">
+                                <div className="flex items-center justify-center gap-4">
+                                  <button
+                                    onClick={() => {
+                                      shareOnX(
+                                        `${baseUrl}/testimonials?address=${address}`,
+                                        "Check out my professional testimonials and recommendations! 🌟"
+                                      );
+                                      setShowShowcaseShareMenu(false);
+                                    }}
+                                    className="flex items-center justify-center p-3 rounded-lg bg-black/20 hover:bg-black/40 transition-all duration-200 hover:scale-110"
+                                    title="Share on X"
+                                  >
+                                    <svg
+                                      width="18"
+                                      height="18"
+                                      viewBox="0 0 24 24"
+                                      fill="currentColor"
+                                      className="text-white"
+                                    >
+                                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                                    </svg>
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      shareOnLinkedIn(
+                                        `${baseUrl}/testimonials?address=${address}`,
+                                        "Professional Testimonials Showcase"
+                                      );
+                                      setShowShowcaseShareMenu(false);
+                                    }}
+                                    className="flex items-center justify-center p-3 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 transition-all duration-200 hover:scale-110"
+                                    title="Share on LinkedIn"
+                                  >
+                                    <Linkedin
+                                      size={18}
+                                      className="text-blue-400"
+                                    />
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      shareOnWhatsApp(
+                                        `${baseUrl}/testimonials?address=${address}`,
+                                        "Take a look at my professional testimonials and recommendations:"
+                                      );
+                                      setShowShowcaseShareMenu(false);
+                                    }}
+                                    className="flex items-center justify-center p-3 rounded-lg bg-green-500/20 hover:bg-green-500/40 transition-all duration-200 hover:scale-110"
+                                    title="Share on WhatsApp"
+                                  >
+                                    <Send
+                                      size={18}
+                                      className="text-green-400"
+                                    />
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      shareViaEmail(
+                                        `${baseUrl}/testimonials?address=${address}`,
+                                        "My Professional Testimonials",
+                                        "Hi,\n\nI wanted to share my professional testimonials and recommendations with you. You can view them here:"
+                                      );
+                                      setShowShowcaseShareMenu(false);
+                                    }}
+                                    className="flex items-center justify-center p-3 rounded-lg bg-gray-500/20 hover:bg-gray-500/40 transition-all duration-200 hover:scale-110"
+                                    title="Share via Email"
+                                  >
+                                    <Mail size={18} className="text-gray-400" />
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1779,16 +1971,6 @@ export default function Dashboard() {
                         </div>
                       </div>
                     </div>
-
-                    {!isEditing && (
-                      <button
-                        onClick={handleEdit}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                        Edit Profile
-                      </button>
-                    )}
                   </div>
                 </div>
 

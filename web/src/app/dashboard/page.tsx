@@ -30,7 +30,6 @@ import {
 } from "lucide-react";
 import { useAccount, useChainId } from "wagmi";
 import { ethers } from "ethers";
-import Link from "next/link";
 import { CONTRACT_ADDRESSES, VouchMeFactory } from "@/utils/contract";
 import { useToast } from "@/hooks/useToast";
 import { useWaku } from "@/hooks/useWaku";
@@ -551,13 +550,15 @@ export default function Dashboard() {
             >
               Later
             </button>
-            <Link
-              href="/profile"
+            <button
+              onClick={() => {
+                setActiveView("profile");
+                handleDismissProfileModal();
+              }}
               className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm text-center"
-              onClick={handleDismissProfileModal}
             >
               Complete Profile
-            </Link>
+            </button>
           </div>
         </div>
       </div>

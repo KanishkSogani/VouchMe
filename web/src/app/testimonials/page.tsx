@@ -163,31 +163,31 @@ export default function TestimonialsPage() {
       if (domain.includes("linkedin.com"))
         return {
           name: "LinkedIn",
-          bgClass: "bg-blue-600/20 text-blue-400 hover:bg-blue-600/30",
+          bgClass: "bg-blue-600/20 text-blue-400",
         };
       if (domain.includes("github.com"))
         return {
           name: "GitHub",
-          bgClass: "bg-gray-600/20 text-gray-300 hover:bg-gray-600/30",
+          bgClass: "bg-gray-600/20 text-gray-300",
         };
       if (domain.includes("twitter.com") || domain.includes("x.com"))
         return {
           name: "Twitter",
-          bgClass: "bg-sky-500/20 text-sky-400 hover:bg-sky-500/30",
+          bgClass: "bg-sky-500/20 text-sky-400",
         };
       if (domain.includes("portfolio") || domain.includes("personal"))
         return {
           name: "Portfolio",
-          bgClass: "bg-purple-600/20 text-purple-400 hover:bg-purple-600/30",
+          bgClass: "bg-purple-600/20 text-purple-400",
         };
       return {
         name: "Profile",
-        bgClass: "bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600/30",
+        bgClass: "bg-indigo-600/20 text-indigo-400",
       };
     } catch {
       return {
         name: "Profile",
-        bgClass: "bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600/30",
+        bgClass: "bg-indigo-600/20 text-indigo-400",
       };
     }
   };
@@ -358,7 +358,7 @@ export default function TestimonialsPage() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Profile Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-[#1f1f1f] rounded-2xl p-5 border border-[#3a3a3a] hover:border-indigo-500/50 transition-all duration-200 lg:sticky lg:top-8 shadow-xl">
+            <div className="bg-[#1f1f1f] rounded-2xl p-5 border border-[#3a3a3a] lg:sticky lg:top-8 shadow-xl">
               {profileLoading ? (
                 <div className="animate-pulse text-center">
                   <div className="w-14 h-14 bg-[#3a3a3a] rounded-full mx-auto mb-3"></div>
@@ -401,7 +401,7 @@ export default function TestimonialsPage() {
                       <div className="text-left space-y-2">
                         <div className="flex items-center gap-2">
                           <div className="w-1 h-4 bg-indigo-500 rounded-full"></div>
-                          <span className="text-xs text-indigo-400 font-medium uppercase tracking-wide">
+                          <span className="text-xs text-white font-medium uppercase tracking-wide">
                             About
                           </span>
                         </div>
@@ -418,7 +418,7 @@ export default function TestimonialsPage() {
                       <div className="text-left space-y-2">
                         <div className="flex items-center gap-2">
                           <div className="w-1 h-4 bg-indigo-500 rounded-full"></div>
-                          <span className="text-xs text-indigo-400 font-medium uppercase tracking-wide">
+                          <span className="text-xs text-white font-medium uppercase tracking-wide">
                             Contact
                           </span>
                         </div>
@@ -476,7 +476,7 @@ export default function TestimonialsPage() {
                 testimonials.map((testimonial, index) => (
                   <div
                     key={index}
-                    className="bg-[#1f1f1f] rounded-xl p-6 border border-[#3a3a3a] hover:border-indigo-500/50 transition-all duration-200 fade-in"
+                    className="bg-[#1f1f1f] rounded-xl p-6 border border-[#3a3a3a] fade-in"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     <div>
@@ -504,7 +504,7 @@ export default function TestimonialsPage() {
                                   href={testimonial.profileUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all hover:scale-105 ${
+                                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                                     getDomainInfo(testimonial.profileUrl)
                                       .bgClass
                                   }`}

@@ -23,6 +23,7 @@ import {
   LayoutDashboard,
   Users,
   Save,
+  Edit3,
   Share2,
   Linkedin,
   Send,
@@ -159,6 +160,10 @@ export default function Dashboard() {
   const [showCollectionShareMenu, setShowCollectionShareMenu] = useState(false);
   const [showShowcaseShareMenu, setShowShowcaseShareMenu] = useState(false);
 
+  // Auto-refresh tracking for first visit to received section
+  const [hasAutoRefreshedOnFirstVisit, setHasAutoRefreshedOnFirstVisit] =
+    useState(false);
+
   useEffect(() => {
     console.log("Dashboard: wakuTestimonials updated:", wakuTestimonials);
     console.log("Dashboard: wakuTestimonials count:", wakuTestimonials.length);
@@ -166,6 +171,34 @@ export default function Dashboard() {
     console.log("Dashboard: wakuConnected:", wakuConnected);
     console.log("Dashboard: activeView:", activeView);
   }, [wakuTestimonials, wakuConnected, activeView]);
+
+  // Auto-refresh testimonials once when user first visits received section
+  useEffect(() => {
+    if (
+      wakuConnected &&
+      !hasAutoRefreshedOnFirstVisit &&
+      activeView === "received"
+    ) {
+      console.log(
+        "Dashboard: Auto-refreshing testimonials on first visit to received section"
+      );
+      const autoRefresh = async () => {
+        try {
+          await refreshTestimonials();
+          setLastRefreshed(new Date());
+          setHasAutoRefreshedOnFirstVisit(true);
+        } catch (error) {
+          console.error("Auto-refresh on first visit failed:", error);
+        }
+      };
+      autoRefresh();
+    }
+  }, [
+    wakuConnected,
+    hasAutoRefreshedOnFirstVisit,
+    activeView,
+    refreshTestimonials,
+  ]);
 
   // Custom refresh handler that updates timestamp
   const handleRefresh = async () => {
@@ -1971,6 +2004,16 @@ export default function Dashboard() {
                         </div>
                       </div>
                     </div>
+
+                    {!isEditing && (
+                      <button
+                        onClick={handleEdit}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                        Edit Profile
+                      </button>
+                    )}
                   </div>
                 </div>
 

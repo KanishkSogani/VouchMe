@@ -393,63 +393,88 @@ export default function TestimonialsPage() {
                 testimonials.map((testimonial, index) => (
                   <div
                     key={index}
-                    className="bg-[#2a2a2a] rounded-xl p-6 hover:bg-[#2d2d2d] transition-colors border border-[#3a3a3a]"
+                    className="bg-[#1f1f1f] rounded-xl p-6 border border-[#3a3a3a] hover:border-indigo-500/50 transition-all duration-200 fade-in"
+                    style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    {/* Header with giver info */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                          <User size={20} className="text-white" />
+                    <div>
+                      {/* Header */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-4">
+                          <div className="relative">
+                            <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center shadow-md">
+                              <User size={20} className="text-white" />
+                            </div>
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center border-2 border-[#1f1f1f]">
+                              <Shield size={10} className="text-white" />
+                            </div>
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-white text-lg mb-1">
+                              {testimonial.giverName || "Anonymous User"}
+                            </h3>
+                            <div className="flex items-center gap-3 text-sm">
+                              <span className="font-mono text-gray-400 bg-[#2a2a2a] px-2 py-1 rounded-md">
+                                {truncateAddress(testimonial.fromAddress)}
+                              </span>
+                              {testimonial.profileUrl && (
+                                <a
+                                  href={testimonial.profileUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all hover:scale-105 ${
+                                    getDomainInfo(testimonial.profileUrl)
+                                      .bgClass
+                                  }`}
+                                >
+                                  <ExternalLink size={11} />
+                                  {getDomainInfo(testimonial.profileUrl).name}
+                                </a>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-white text-lg">
-                            {testimonial.giverName || "Anonymous"}
-                          </h3>
-                          <div className="flex items-center gap-3 text-sm">
-                            <span className="font-mono text-gray-400">
-                              {truncateAddress(testimonial.fromAddress)}
-                            </span>
-                            {testimonial.profileUrl && (
-                              <a
-                                href={testimonial.profileUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all hover:scale-105 ${
-                                  getDomainInfo(testimonial.profileUrl).bgClass
-                                }`}
-                              >
-                                <ExternalLink size={11} />
-                                {getDomainInfo(testimonial.profileUrl).name}
-                              </a>
-                            )}
+                        <div className="text-right">
+                          <div className="text-sm font-medium text-gray-300">
+                            {new Date(
+                              testimonial.timestamp * 1000
+                            ).toLocaleDateString()}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {new Date(
+                              testimonial.timestamp * 1000
+                            ).toLocaleTimeString()}
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 text-green-400 bg-green-500/10 px-3 py-1.5 rounded-full">
-                        <Shield size={14} />
-                        <span className="text-sm font-medium">Verified</span>
+
+                      {/* Content */}
+                      <div className="mb-4">
+                        <div className="bg-[#2a2a2a] rounded-lg p-4 border-l-4 border-indigo-500">
+                          <p className="text-gray-200 leading-relaxed text-lg">
+                            &ldquo;{testimonial.content}&rdquo;
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Testimonial content */}
-                    <div className="mb-4">
-                      <p className="text-gray-100 leading-relaxed text-lg">
-                        &ldquo;{testimonial.content}&rdquo;
-                      </p>
-                    </div>
-
-                    {/* Footer with timestamp */}
-                    <div className="flex items-center gap-2 text-sm text-gray-500 pt-4 border-t border-[#3a3a3a]">
-                      <Calendar size={14} />
-                      <span>
-                        {new Date(
-                          testimonial.timestamp * 1000
-                        ).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </span>
+                      {/* Footer */}
+                      <div className="flex items-center justify-between pt-4 border-t border-[#3a3a3a]">
+                        <div className="flex items-center gap-2 text-sm text-gray-400">
+                          <Shield size={14} className="text-green-400" />
+                          <span>Verified</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <Calendar size={14} />
+                          <span>
+                            {new Date(
+                              testimonial.timestamp * 1000
+                            ).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))

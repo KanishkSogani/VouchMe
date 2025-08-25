@@ -79,8 +79,6 @@ export default function Dashboard() {
     notifications,
     clearNotifications,
     removeTestimonial,
-    connectionError: wakuConnectionError,
-    reconnect: reconnectWaku,
     refreshTestimonials,
     isRefreshing,
   } = useWaku();
@@ -792,7 +790,7 @@ export default function Dashboard() {
     window.open(twitterUrl, "_blank", "noopener,noreferrer");
   };
 
-  const shareOnLinkedIn = (url: string, title: string) => {
+  const shareOnLinkedIn = (url: string) => {
     const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
       url
     )}`;
@@ -1298,10 +1296,7 @@ export default function Dashboard() {
                                   </button>
                                   <button
                                     onClick={() => {
-                                      shareOnLinkedIn(
-                                        shareableLink,
-                                        "Professional Testimonial Collection"
-                                      );
+                                      shareOnLinkedIn(shareableLink);
                                       setShowCollectionShareMenu(false);
                                     }}
                                     className="flex items-center justify-center p-3 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 transition-all duration-200 hover:scale-110"
@@ -1422,8 +1417,7 @@ export default function Dashboard() {
                                   <button
                                     onClick={() => {
                                       shareOnLinkedIn(
-                                        `${baseUrl}/testimonials?address=${address}`,
-                                        "Professional Testimonials Showcase"
+                                        `${baseUrl}/testimonials?address=${address}`
                                       );
                                       setShowShowcaseShareMenu(false);
                                     }}
@@ -1654,7 +1648,7 @@ export default function Dashboard() {
                             <div className="flex items-center justify-between pt-4 border-t border-[#3a3a3a]">
                               <div className="flex items-center gap-2 text-sm text-gray-400">
                                 <Shield size={14} className="text-green-400" />
-                                <span>Verified on blockchain</span>
+                                <span>Verified</span>
                               </div>
                               <div className="flex items-center gap-2 text-sm text-gray-500">
                                 <Calendar size={14} />

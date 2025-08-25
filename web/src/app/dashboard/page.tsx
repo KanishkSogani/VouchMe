@@ -1210,7 +1210,7 @@ export default function Dashboard() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                   {/* Share Links Card */}
-                  <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-6 hover:border-indigo-500/50 transition-colors">
+                  <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-6">
                     <div className="flex items-center gap-3 mb-6">
                       <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
                         <ExternalLink className="w-5 h-5 text-blue-400" />
@@ -1470,7 +1470,7 @@ export default function Dashboard() {
                   </div>
 
                   {/* Add Testimonial Card */}
-                  <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-6 hover:border-green-500/50 transition-colors">
+                  <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-6">
                     <div className="flex items-center gap-3 mb-6">
                       <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
                         <FileText className="w-5 h-5 text-green-400" />
@@ -1564,7 +1564,7 @@ export default function Dashboard() {
                       {testimonials.map((testimonial, index) => (
                         <div
                           key={index}
-                          className="bg-[#1f1f1f] rounded-xl p-6 border border-[#3a3a3a] hover:border-indigo-500/50 transition-all duration-200 fade-in"
+                          className="bg-[#1f1f1f] rounded-xl p-6 border border-[#3a3a3a] fade-in"
                           style={{ animationDelay: `${index * 100}ms` }}
                         >
                           <div>
@@ -1840,7 +1840,7 @@ export default function Dashboard() {
                     {wakuTestimonials.map((testimonial) => (
                       <div
                         key={testimonial.id}
-                        className="bg-[#2a2a2a] rounded-lg p-6 border border-[#3a3a3a] hover:border-[#4a4a4a] transition-colors"
+                        className="bg-[#2a2a2a] rounded-lg p-6 border border-[#3a3a3a]"
                       >
                         {/* Header */}
                         <div className="flex items-start justify-between mb-4">

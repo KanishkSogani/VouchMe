@@ -8,7 +8,8 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract VouchMe is ERC721URIStorage {
     using ECDSA for bytes32;
-    using Strings for uint256;    
+    using Strings for uint256;
+    
     uint256 private _tokenIdTracker; // Manually track token IDs
 
     // Maps user address to their received testimonial token IDs
@@ -24,18 +25,20 @@ contract VouchMe is ERC721URIStorage {
     mapping(address => mapping(address => uint256)) private _testimonial;
     
     // Maps user address to their profile data
-    mapping(address => Profile) public userProfiles;    
+    mapping(address => Profile) public userProfiles;
+    
     struct Profile {
         string name;
         string contact;
         string bio;
     }
-      struct Testimonial {
+    
+    struct Testimonial {
         address sender;
         address receiver;
         string content;
-        string giverName;   
-        string profileUrl;    
+        string giverName;
+        string profileUrl;
         uint256 timestamp;
         bool verified;
     }
@@ -46,7 +49,9 @@ contract VouchMe is ERC721URIStorage {
     event TestimonialUpdated(address sender, address receiver, uint256 newTokenId);
     event ProfileUpdated(address user);
     
-    constructor() ERC721("VouchMe Testimonial", "VOUCH") {}    /**
+    constructor() ERC721("VouchMe Testimonial", "VOUCH") {}
+    
+    /**
      * @dev Creates a testimonial NFT based on a signed message
      * @param senderAddress Address of the sender who created the testimonial
      * @param content The testimonial content
@@ -56,12 +61,13 @@ contract VouchMe is ERC721URIStorage {
      * @return tokenId The ID of the newly created testimonial NFT
      */
     function createTestimonial(
-        address senderAddress, 
+        address senderAddress,
         string calldata content,
         string calldata giverName,
         string calldata profileUrl,
         bytes calldata signature
-    ) external returns (uint256) {        // Hash the message that was signed
+    ) external returns (uint256) {
+        // Hash the message that was signed
         bytes32 messageHash = keccak256(
             abi.encodePacked(
                 senderAddress,
@@ -73,7 +79,8 @@ contract VouchMe is ERC721URIStorage {
         );
         
         bytes32 ethSignedMessageHash = MessageHashUtils.toEthSignedMessageHash(messageHash);
-          // Verify the signature matches the sender
+        
+        // Verify the signature matches the sender
         address recoveredSigner = ethSignedMessageHash.recover(signature);
         require(recoveredSigner == senderAddress, "Invalid signature");
 
@@ -88,7 +95,8 @@ contract VouchMe is ERC721URIStorage {
 
         // Mint the NFT to the receiver
         _mint(msg.sender, newTokenId);
-          // Store the testimonial details
+        
+        // Store the testimonial details
         _testimonials[newTokenId] = Testimonial({
             sender: senderAddress,
             receiver: msg.sender,
@@ -98,7 +106,8 @@ contract VouchMe is ERC721URIStorage {
             timestamp: block.timestamp,
             verified: true
         });
-          // Add to receiver's testimonials
+        
+        // Add to receiver's testimonials
         uint256 newIndex = _receivedTestimonials[msg.sender].length;
         _receivedTestimonials[msg.sender].push(newTokenId);
         _testimonialIndexInArray[newTokenId] = newIndex;
@@ -109,7 +118,8 @@ contract VouchMe is ERC721URIStorage {
         // Generate token URI
         string memory tokenURI = generateTokenURI(newTokenId);
         _setTokenURI(newTokenId, tokenURI);
-          emit TestimonialCreated(newTokenId, senderAddress, msg.sender);
+        
+        emit TestimonialCreated(newTokenId, senderAddress, msg.sender);
         
         // If we replaced an existing testimonial, emit the update event
         if (existingTokenId != 0) {
@@ -127,7 +137,8 @@ contract VouchMe is ERC721URIStorage {
     function getReceivedTestimonials(address receiver) external view returns (uint256[] memory) {
         return _receivedTestimonials[receiver];
     }
-      /**
+    
+    /**
      * @dev Gets details of a specific testimonial
      * @param tokenId The token ID of the testimonial
      * @return Testimonial struct containing details
@@ -159,11 +170,12 @@ contract VouchMe is ERC721URIStorage {
      */
     function generateTokenURI(uint256 tokenId) internal view returns (string memory) {
         Testimonial memory testimonial = _testimonials[tokenId];
-          return string(
+        
+        return string(
             abi.encodePacked(
                 '{"tokenId":"', tokenId.toString(),
                 '","sender":"', addressToString(testimonial.sender),
-                '","receiver":"', addressToString(testimonial.receiver),                
+                '","receiver":"', addressToString(testimonial.receiver),
                 '","content":"', testimonial.content,
                 '","giverName":"', testimonial.giverName,
                 '","profileUrl":"', testimonial.profileUrl,
@@ -188,15 +200,20 @@ contract VouchMe is ERC721URIStorage {
      */
     function addressToString(address _address) internal pure returns (string memory) {
         return Strings.toHexString(uint256(uint160(_address)), 20);
-    }    /**
+    }
+    
+    /**
      * @dev Sets or updates a user's profile information
      * @param name The user's name
      * @param contact The user's contact information
      * @param bio The user's biography
-     */    function setProfile(
+     */
+    function setProfile(
         string calldata name,
         string calldata contact,
-        string calldata bio    ) external {        userProfiles[msg.sender] = Profile({
+        string calldata bio
+    ) external {
+        userProfiles[msg.sender] = Profile({
             name: name,
             contact: contact,
             bio: bio

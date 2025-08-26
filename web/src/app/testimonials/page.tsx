@@ -163,31 +163,31 @@ export default function TestimonialsPage() {
       if (domain.includes("linkedin.com"))
         return {
           name: "LinkedIn",
-          bgClass: "bg-blue-600/20 text-blue-400 hover:bg-blue-600/30",
+          bgClass: "bg-blue-600/20 text-blue-400",
         };
       if (domain.includes("github.com"))
         return {
           name: "GitHub",
-          bgClass: "bg-gray-600/20 text-gray-300 hover:bg-gray-600/30",
+          bgClass: "bg-gray-600/20 text-gray-300",
         };
       if (domain.includes("twitter.com") || domain.includes("x.com"))
         return {
           name: "Twitter",
-          bgClass: "bg-sky-500/20 text-sky-400 hover:bg-sky-500/30",
+          bgClass: "bg-sky-500/20 text-sky-400",
         };
       if (domain.includes("portfolio") || domain.includes("personal"))
         return {
           name: "Portfolio",
-          bgClass: "bg-purple-600/20 text-purple-400 hover:bg-purple-600/30",
+          bgClass: "bg-purple-600/20 text-purple-400",
         };
       return {
         name: "Profile",
-        bgClass: "bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600/30",
+        bgClass: "bg-indigo-600/20 text-indigo-400",
       };
     } catch {
       return {
         name: "Profile",
-        bgClass: "bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600/30",
+        bgClass: "bg-indigo-600/20 text-indigo-400",
       };
     }
   };
@@ -199,10 +199,93 @@ export default function TestimonialsPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#1a1a1a] text-white py-8">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
-            <p className="mt-4">Loading testimonials...</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header Section Skeleton */}
+          <div className="text-center mb-12">
+            <div className="animate-pulse">
+              <div className="h-10 bg-[#2a2a2a] rounded-lg w-64 mx-auto mb-4"></div>
+              <div className="h-6 bg-[#2a2a2a] rounded-lg w-96 mx-auto"></div>
+            </div>
+          </div>
+
+          {/* Main Content Grid Skeleton */}
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Profile Sidebar Skeleton */}
+            <div className="lg:col-span-1">
+              <div className="bg-[#2a2a2a] rounded-2xl p-5 border border-gray-800 relative overflow-hidden">
+                <div className="animate-pulse text-center">
+                  <div className="w-14 h-14 bg-[#3a3a3a] rounded-full mx-auto mb-3"></div>
+                  <div className="space-y-3">
+                    <div className="h-4 bg-[#3a3a3a] rounded w-2/3 mx-auto"></div>
+                    <div className="h-4 bg-[#3a3a3a] rounded w-1/3 mx-auto"></div>
+                    <div className="space-y-2 mt-4">
+                      <div className="h-3 bg-[#3a3a3a] rounded w-1/3"></div>
+                      <div className="h-10 bg-[#3a3a3a] rounded"></div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="h-3 bg-[#3a3a3a] rounded w-1/3"></div>
+                      <div className="h-8 bg-[#3a3a3a] rounded"></div>
+                    </div>
+                    <div className="h-3 bg-[#3a3a3a] rounded w-2/3 mx-auto"></div>
+                  </div>
+                </div>
+                {/* Shimmer effect overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent skeleton-shine"></div>
+              </div>
+            </div>
+
+            {/* Testimonials Content Skeleton */}
+            <div className="lg:col-span-2">
+              <div className="space-y-6">
+                {[...Array(3)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="bg-[#1f1f1f] rounded-xl p-6 border border-[#3a3a3a] relative overflow-hidden"
+                  >
+                    <div className="animate-pulse">
+                      {/* Header */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-4">
+                          <div className="relative">
+                            <div className="w-12 h-12 rounded-xl bg-[#3a3a3a]"></div>
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#3a3a3a] rounded-full"></div>
+                          </div>
+                          <div>
+                            <div className="h-5 bg-[#3a3a3a] rounded w-32 mb-2"></div>
+                            <div className="flex items-center gap-3">
+                              <div className="h-4 bg-[#3a3a3a] rounded w-20"></div>
+                              <div className="h-4 bg-[#3a3a3a] rounded w-16"></div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="h-4 bg-[#3a3a3a] rounded w-20 mb-1"></div>
+                          <div className="h-3 bg-[#3a3a3a] rounded w-16"></div>
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="space-y-3 mb-6">
+                        <div className="h-4 bg-[#3a3a3a] rounded w-full"></div>
+                        <div className="h-4 bg-[#3a3a3a] rounded w-[95%]"></div>
+                        <div className="h-4 bg-[#3a3a3a] rounded w-[80%]"></div>
+                      </div>
+
+                      {/* Footer */}
+                      <div className="flex items-center justify-between pt-4 border-t border-[#3a3a3a]">
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-[#3a3a3a] rounded"></div>
+                          <div className="h-3 bg-[#3a3a3a] rounded w-16"></div>
+                        </div>
+                        <div className="h-6 bg-[#3a3a3a] rounded w-20"></div>
+                      </div>
+                    </div>
+                    {/* Shimmer effect overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent skeleton-shine"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -275,30 +358,30 @@ export default function TestimonialsPage() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Profile Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-[#2a2a2a] rounded-2xl p-5 border border-gray-800 lg:sticky lg:top-8">
+            <div className="bg-[#1f1f1f] rounded-2xl p-5 border border-[#3a3a3a] lg:sticky lg:top-8 shadow-xl">
               {profileLoading ? (
                 <div className="animate-pulse text-center">
-                  <div className="w-14 h-14 bg-gray-600 rounded-full mx-auto mb-3"></div>
+                  <div className="w-14 h-14 bg-[#3a3a3a] rounded-full mx-auto mb-3"></div>
                   <div className="space-y-3">
-                    <div className="h-4 bg-gray-600 rounded w-2/3 mx-auto"></div>
-                    <div className="h-4 bg-gray-600 rounded w-1/3 mx-auto"></div>
+                    <div className="h-4 bg-[#3a3a3a] rounded w-2/3 mx-auto"></div>
+                    <div className="h-4 bg-[#3a3a3a] rounded w-1/3 mx-auto"></div>
                     <div className="space-y-2 mt-4">
-                      <div className="h-3 bg-gray-600 rounded w-1/3"></div>
-                      <div className="h-10 bg-gray-600 rounded"></div>
+                      <div className="h-3 bg-[#3a3a3a] rounded w-1/3"></div>
+                      <div className="h-10 bg-[#3a3a3a] rounded"></div>
                     </div>
                     <div className="space-y-2">
-                      <div className="h-3 bg-gray-600 rounded w-1/3"></div>
-                      <div className="h-8 bg-gray-600 rounded"></div>
+                      <div className="h-3 bg-[#3a3a3a] rounded w-1/3"></div>
+                      <div className="h-8 bg-[#3a3a3a] rounded"></div>
                     </div>
-                    <div className="h-3 bg-gray-600 rounded w-2/3 mx-auto"></div>
+                    <div className="h-3 bg-[#3a3a3a] rounded w-2/3 mx-auto"></div>
                   </div>
                 </div>
               ) : profile &&
                 (profile.name || profile.bio || profile.contact) ? (
                 <div className="text-center">
                   {/* Profile Avatar */}
-                  <div className="w-14 h-14 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
-                    <User className="w-7 h-7 text-gray-200" />
+                  <div className="w-14 h-14 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
+                    <User className="w-7 h-7 text-white" />
                   </div>
 
                   {/* Profile Info */}
@@ -317,12 +400,12 @@ export default function TestimonialsPage() {
                     {profile.bio && (
                       <div className="text-left space-y-2">
                         <div className="flex items-center gap-2">
-                          <div className="w-1 h-4 bg-gray-500 rounded-full"></div>
-                          <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+                          <div className="w-1 h-4 bg-indigo-500 rounded-full"></div>
+                          <span className="text-xs text-white font-medium uppercase tracking-wide">
                             About
                           </span>
                         </div>
-                        <div className="bg-gray-800/20 rounded-lg p-3 border border-gray-700/30">
+                        <div className="bg-[#2a2a2a] rounded-lg p-3 border border-indigo-500/20">
                           <p className="text-gray-300 text-sm leading-relaxed">
                             {profile.bio}
                           </p>
@@ -334,20 +417,20 @@ export default function TestimonialsPage() {
                     {profile.contact && (
                       <div className="text-left space-y-2">
                         <div className="flex items-center gap-2">
-                          <div className="w-1 h-4 bg-gray-500 rounded-full"></div>
-                          <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+                          <div className="w-1 h-4 bg-indigo-500 rounded-full"></div>
+                          <span className="text-xs text-white font-medium uppercase tracking-wide">
                             Contact
                           </span>
                         </div>
-                        <div className="flex items-center gap-3 text-gray-300 text-sm p-3 bg-gray-800/20 rounded-lg border border-gray-700/30">
-                          <Mail className="w-4 h-4 flex-shrink-0 text-gray-500" />
+                        <div className="flex items-center gap-3 text-gray-300 text-sm p-3 bg-[#2a2a2a] rounded-lg border border-indigo-500/20">
+                          <Mail className="w-4 h-4 flex-shrink-0 text-indigo-400" />
                           <span className="truncate">{profile.contact}</span>
                         </div>
                       </div>
                     )}
 
                     {/* Stats */}
-                    <div className="pt-3 border-t border-gray-700/50">
+                    <div className="pt-3 border-t border-[#3a3a3a]">
                       <div className="text-center">
                         <div className="text-2xl font-bold text-white">
                           {testimonials.length}
@@ -361,8 +444,8 @@ export default function TestimonialsPage() {
                 </div>
               ) : (
                 <div className="text-center">
-                  <div className="w-14 h-14 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <User className="w-7 h-7 text-gray-300" />
+                  <div className="w-14 h-14 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <User className="w-7 h-7 text-white" />
                   </div>
                   <h3 className="text-lg font-bold text-white mb-1">
                     {address ? truncateAddress(address) : "Unknown User"}
@@ -371,7 +454,7 @@ export default function TestimonialsPage() {
                     <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
                     <span className="font-medium">Profile Not Set</span>
                   </div>
-                  <div className="pt-3 border-t border-gray-700/50 mt-4">
+                  <div className="pt-3 border-t border-[#3a3a3a] mt-4">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-white">
                         {testimonials.length}
@@ -393,63 +476,88 @@ export default function TestimonialsPage() {
                 testimonials.map((testimonial, index) => (
                   <div
                     key={index}
-                    className="bg-[#2a2a2a] rounded-xl p-6 hover:bg-[#2d2d2d] transition-colors border border-[#3a3a3a]"
+                    className="bg-[#1f1f1f] rounded-xl p-6 border border-[#3a3a3a] fade-in"
+                    style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    {/* Header with giver info */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                          <User size={20} className="text-white" />
+                    <div>
+                      {/* Header */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-4">
+                          <div className="relative">
+                            <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center shadow-md">
+                              <User size={20} className="text-white" />
+                            </div>
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center border-2 border-[#1f1f1f]">
+                              <Shield size={10} className="text-white" />
+                            </div>
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-white text-lg mb-1">
+                              {testimonial.giverName || "Anonymous User"}
+                            </h3>
+                            <div className="flex items-center gap-3 text-sm">
+                              <span className="font-mono text-gray-400 bg-[#2a2a2a] px-2 py-1 rounded-md">
+                                {truncateAddress(testimonial.fromAddress)}
+                              </span>
+                              {testimonial.profileUrl && (
+                                <a
+                                  href={testimonial.profileUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                                    getDomainInfo(testimonial.profileUrl)
+                                      .bgClass
+                                  }`}
+                                >
+                                  <ExternalLink size={11} />
+                                  {getDomainInfo(testimonial.profileUrl).name}
+                                </a>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-white text-lg">
-                            {testimonial.giverName || "Anonymous"}
-                          </h3>
-                          <div className="flex items-center gap-3 text-sm">
-                            <span className="font-mono text-gray-400">
-                              {truncateAddress(testimonial.fromAddress)}
-                            </span>
-                            {testimonial.profileUrl && (
-                              <a
-                                href={testimonial.profileUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all hover:scale-105 ${
-                                  getDomainInfo(testimonial.profileUrl).bgClass
-                                }`}
-                              >
-                                <ExternalLink size={11} />
-                                {getDomainInfo(testimonial.profileUrl).name}
-                              </a>
-                            )}
+                        <div className="text-right">
+                          <div className="text-sm font-medium text-gray-300">
+                            {new Date(
+                              testimonial.timestamp * 1000
+                            ).toLocaleDateString()}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {new Date(
+                              testimonial.timestamp * 1000
+                            ).toLocaleTimeString()}
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 text-green-400 bg-green-500/10 px-3 py-1.5 rounded-full">
-                        <Shield size={14} />
-                        <span className="text-sm font-medium">Verified</span>
+
+                      {/* Content */}
+                      <div className="mb-4">
+                        <div className="bg-[#2a2a2a] rounded-lg p-4 border-l-4 border-indigo-500">
+                          <p className="text-gray-200 leading-relaxed text-lg">
+                            &ldquo;{testimonial.content}&rdquo;
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Testimonial content */}
-                    <div className="mb-4">
-                      <p className="text-gray-100 leading-relaxed text-lg">
-                        &ldquo;{testimonial.content}&rdquo;
-                      </p>
-                    </div>
-
-                    {/* Footer with timestamp */}
-                    <div className="flex items-center gap-2 text-sm text-gray-500 pt-4 border-t border-[#3a3a3a]">
-                      <Calendar size={14} />
-                      <span>
-                        {new Date(
-                          testimonial.timestamp * 1000
-                        ).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </span>
+                      {/* Footer */}
+                      <div className="flex items-center justify-between pt-4 border-t border-[#3a3a3a]">
+                        <div className="flex items-center gap-2 text-sm text-gray-400">
+                          <Shield size={14} className="text-green-400" />
+                          <span>Verified</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <Calendar size={14} />
+                          <span>
+                            {new Date(
+                              testimonial.timestamp * 1000
+                            ).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))

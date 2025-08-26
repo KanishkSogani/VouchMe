@@ -38,6 +38,7 @@ export default function WritePage() {
     connectionError: wakuConnectionError,
     reconnect: reconnectWaku,
   } = useWaku();
+  // TODO: Implement error display and manual reconnection in UI
   console.log("Waku connection error:", wakuConnectionError);
   console.log(
     "Waku reconnect function available:",
@@ -274,11 +275,11 @@ export default function WritePage() {
           <div className="lg:col-span-1 order-1 lg:order-1">
             {/* Recipient Profile Card */}
             {receiverProfile && !profileLoading && (
-              <div className="bg-[#2a2a2a] rounded-2xl p-5 border border-gray-800">
+              <div className="bg-[#1f1f1f] rounded-2xl p-5 border border-[#3a3a3a]">
                 <div className="text-center">
                   {/* Profile Avatar */}
-                  <div className="w-14 h-14 bg-gradient-to-br from-gray-600 to-gray-700 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
-                    <User className="w-7 h-7 text-gray-200" />
+                  <div className="w-14 h-14 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
+                    <User className="w-7 h-7 text-white" />
                   </div>
 
                   {/* Profile Info */}
@@ -296,12 +297,12 @@ export default function WritePage() {
                     {/* Bio Section */}
                     <div className="text-left space-y-2">
                       <div className="flex items-center gap-2">
-                        <div className="w-1 h-4 bg-gray-500 rounded-full"></div>
-                        <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+                        <div className="w-1 h-4 bg-indigo-500 rounded-full"></div>
+                        <span className="text-xs text-white font-medium uppercase tracking-wide">
                           About
                         </span>
                       </div>
-                      <div className="bg-gray-800/20 rounded-lg p-3 border border-gray-700/30">
+                      <div className="bg-[#2a2a2a] rounded-lg p-3 border border-[#3a3a3a]">
                         <p className="text-gray-300 text-sm leading-relaxed">
                           {receiverProfile.bio}
                         </p>
@@ -311,22 +312,22 @@ export default function WritePage() {
                     {/* Contact Section */}
                     <div className="text-left space-y-2">
                       <div className="flex items-center gap-2">
-                        <div className="w-1 h-4 bg-gray-500 rounded-full"></div>
-                        <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+                        <div className="w-1 h-4 bg-indigo-500 rounded-full"></div>
+                        <span className="text-xs text-white font-medium uppercase tracking-wide">
                           Contact
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 text-gray-300 text-sm p-3 bg-gray-800/20 rounded-lg border border-gray-700/30">
-                        <Mail className="w-4 h-4 flex-shrink-0 text-gray-500" />
+                      <div className="flex items-center gap-3 text-gray-300 text-sm p-3 bg-[#2a2a2a] rounded-lg border border-[#3a3a3a]">
+                        <Mail className="w-4 h-4 flex-shrink-0 text-indigo-400" />
                         <span className="truncate">
                           {receiverProfile.contact}
                         </span>
                       </div>
                     </div>
 
-                    <div className="pt-3 border-t border-gray-700/50">
-                      <div className="flex items-center justify-center gap-2 text-blue-400 text-xs">
-                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                    <div className="pt-3 border-t border-[#3a3a3a]">
+                      <div className="flex items-center justify-center gap-2 text-green-400 text-xs">
+                        <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
                         <span>Eligible to receive testimonials</span>
                       </div>
                     </div>
@@ -337,21 +338,21 @@ export default function WritePage() {
 
             {/* Loading state for profile */}
             {profileLoading && (
-              <div className="bg-[#2a2a2a] rounded-2xl p-5 border border-gray-800 sticky top-8">
+              <div className="bg-[#1f1f1f] rounded-2xl p-5 border border-[#3a3a3a] sticky top-8">
                 <div className="animate-pulse text-center">
-                  <div className="w-14 h-14 bg-gray-600 rounded-full mx-auto mb-3"></div>
+                  <div className="w-14 h-14 bg-[#3a3a3a] rounded-full mx-auto mb-3"></div>
                   <div className="space-y-3">
-                    <div className="h-4 bg-gray-600 rounded w-2/3 mx-auto"></div>
-                    <div className="h-4 bg-gray-600 rounded w-1/3 mx-auto"></div>
+                    <div className="h-4 bg-[#3a3a3a] rounded w-2/3 mx-auto"></div>
+                    <div className="h-4 bg-[#3a3a3a] rounded w-1/3 mx-auto"></div>
                     <div className="space-y-2 mt-4">
-                      <div className="h-3 bg-gray-600 rounded w-1/3"></div>
-                      <div className="h-10 bg-gray-600 rounded"></div>
+                      <div className="h-3 bg-[#3a3a3a] rounded w-1/3"></div>
+                      <div className="h-10 bg-[#3a3a3a] rounded"></div>
                     </div>
                     <div className="space-y-2">
-                      <div className="h-3 bg-gray-600 rounded w-1/3"></div>
-                      <div className="h-8 bg-gray-600 rounded"></div>
+                      <div className="h-3 bg-[#3a3a3a] rounded w-1/3"></div>
+                      <div className="h-8 bg-[#3a3a3a] rounded"></div>
                     </div>
-                    <div className="h-3 bg-gray-600 rounded w-2/3 mx-auto"></div>
+                    <div className="h-3 bg-[#3a3a3a] rounded w-2/3 mx-auto"></div>
                   </div>
                 </div>
               </div>
@@ -360,7 +361,7 @@ export default function WritePage() {
 
           {/* Form Section - Right Side */}
           <div className="lg:col-span-2 order-2 lg:order-2">
-            <div className="bg-[#2a2a2a] rounded-2xl p-8 border border-gray-800">
+            <div className="bg-[#1f1f1f] rounded-2xl p-8 border border-[#3a3a3a]">
               <div className="mb-6">
                 <h2 className="text-2xl font-bold text-white mb-2">
                   Write Your Testimonial
@@ -372,7 +373,7 @@ export default function WritePage() {
 
               <form onSubmit={handleCreateSignedMessage} className="space-y-6">
                 {/* Waku Status and Send Method Selector */}
-                <div className="bg-gray-800/30 rounded-xl p-4 border border-gray-700/30">
+                <div className="bg-[#2a2a2a] rounded-xl p-4 border border-[#3a3a3a]">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       {wakuConnected ? (
@@ -406,8 +407,8 @@ export default function WritePage() {
                           sendMethod === "waku" && wakuConnected
                             ? "bg-green-600/20 text-green-400 border border-green-500/30"
                             : wakuConnected
-                            ? "bg-gray-700/50 text-gray-300 border border-gray-600/30 hover:bg-gray-700"
-                            : "bg-gray-700/30 text-gray-500 border border-gray-600/20 cursor-not-allowed"
+                            ? "bg-[#3a3a3a] text-gray-300 border border-[#4a4a4a]"
+                            : "bg-[#2a2a2a] text-gray-500 border border-[#3a3a3a] cursor-not-allowed"
                         }`}
                       >
                         <Send className="w-3 h-3" />
@@ -418,8 +419,8 @@ export default function WritePage() {
                         onClick={() => setSendMethod("manual")}
                         className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                           sendMethod === "manual"
-                            ? "bg-blue-600/20 text-blue-400 border border-blue-500/30"
-                            : "bg-gray-700/50 text-gray-300 border border-gray-600/30 hover:bg-gray-700"
+                            ? "bg-green-600/20 text-green-400 border border-green-500/30"
+                            : "bg-[#3a3a3a] text-gray-300 border border-[#4a4a4a]"
                         }`}
                       >
                         <Copy className="w-3 h-3" />
@@ -451,7 +452,7 @@ export default function WritePage() {
                     value={giverName}
                     onChange={(e) => setGiverName(e.target.value)}
                     placeholder="Enter your full name"
-                    className="w-full bg-[#3a3a3a] border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-gray-500 focus:ring-2 focus:ring-gray-500/20 transition-all duration-200"
+                    className="w-full bg-[#2a2a2a] border border-[#3a3a3a] rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
                     required
                   />
                 </div>
@@ -472,7 +473,7 @@ export default function WritePage() {
                     value={profileUrl}
                     onChange={(e) => setProfileUrl(e.target.value)}
                     placeholder="https://linkedin.com/in/yourprofile"
-                    className="w-full bg-[#3a3a3a] border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-gray-500 focus:ring-2 focus:ring-gray-500/20 transition-all duration-200"
+                    className="w-full bg-[#2a2a2a] border border-[#3a3a3a] rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
                   />
                   <p className="text-xs text-gray-500">
                     Add your LinkedIn, GitHub, or professional profile URL for
@@ -495,7 +496,7 @@ export default function WritePage() {
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="Write your honest testimonial about this person's work, skills, or character..."
-                    className="w-full bg-[#3a3a3a] border border-gray-700 rounded-xl px-4 py-4 text-white placeholder-gray-500 focus:border-gray-500 focus:ring-2 focus:ring-gray-500/20 transition-all duration-200 resize-none"
+                    className="w-full bg-[#2a2a2a] border border-[#3a3a3a] rounded-xl px-4 py-4 text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 resize-none"
                     rows={8}
                     required
                   />
@@ -558,17 +559,17 @@ export default function WritePage() {
 
             {/* Signed Message Output - Only show for manual mode */}
             {signedMessage && sendMethod === "manual" && (
-              <div className="bg-[#2a2a2a] rounded-2xl p-8 border border-gray-800 mt-8">
+              <div className="bg-[#1f1f1f] rounded-2xl p-8 border border-[#3a3a3a] mt-8">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold text-white flex items-center gap-3">
-                    <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
-                      <Check className="w-4 h-4 text-green-400" />
+                    <div className="w-8 h-8 bg-indigo-500/20 rounded-full flex items-center justify-center">
+                      <Check className="w-4 h-4 text-indigo-400" />
                     </div>
                     Signed Testimonial
                   </h3>
                   <button
                     onClick={copyToClipboard}
-                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                    className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                   >
                     {copied ? (
                       <Check className="w-4 h-4" />
@@ -579,16 +580,16 @@ export default function WritePage() {
                   </button>
                 </div>
 
-                <div className="bg-[#1a1a1a] rounded-xl p-4 border border-gray-700 mb-4">
+                <div className="bg-[#2a2a2a] rounded-xl p-4 border border-[#3a3a3a] mb-4">
                   <pre className="text-sm text-gray-300 overflow-auto whitespace-pre-wrap break-all">
                     {signedMessage}
                   </pre>
                 </div>
 
-                <div className="p-4 bg-gray-500/10 border border-gray-500/20 rounded-xl">
+                <div className="p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-gray-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <FileText className="w-3 h-3 text-gray-400" />
+                    <div className="w-6 h-6 bg-indigo-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <FileText className="w-3 h-3 text-indigo-400" />
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-300 mb-1">

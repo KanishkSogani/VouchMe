@@ -31,7 +31,7 @@ const Navbar = ({
 
   return (
     <nav className="bg-[#171717]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link href="/" className="text-white text-2xl font-bold">
@@ -54,23 +54,6 @@ const Navbar = ({
                 >
                   About Us
                 </button>
-              </>
-            )}
-
-            {!isLandingPage && isAuthenticated && (
-              <>
-                <Link
-                  href="/dashboard"
-                  className="text-gray-300 hover:text-white transition-colors font-semibold"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  href="/profile"
-                  className="text-gray-300 hover:text-white transition-colors font-semibold"
-                >
-                  Profile
-                </Link>
               </>
             )}
 

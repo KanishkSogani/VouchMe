@@ -5,9 +5,9 @@ const FeaturesSection = () => {
   const features = [
     {
       icon: Plus,
-      title: "Easy Collection",
+      title: "Easy to Request Testimonials",
       description:
-        "Simple one-click process for people to leave verified testimonials through your personalized link.",
+        "Simple one-click process to submit verified testimonials through your personalized link.",
       iconBg: "bg-indigo-600",
     },
     {
@@ -34,7 +34,7 @@ const FeaturesSection = () => {
             VouchMe Features
           </h2>
           <p className="text-gray-600 text-lg max-w-3xl mx-auto">
-            Everything you need to collect, verify, and showcase authentic
+            Everything you need to Request, verify, and showcase authentic
             testimonials on the blockchain
           </p>
         </div>

@@ -34,7 +34,7 @@ const TestimonialsSection = () => {
               Decentralized Testimonials for the Digital Age
             </h1>{" "}
             <p className="text-gray-300 text-lg md:text-xl">
-              Leverage blockchain technology to collect, verify, and showcase
+              Leverage blockchain technology to Request, verify, and showcase
               authentic testimonials. Build trust with your audience through
               transparent and immutable proof of satisfaction.
             </p>

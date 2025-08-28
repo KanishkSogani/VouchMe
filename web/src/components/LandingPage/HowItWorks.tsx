@@ -10,9 +10,9 @@ const HowItWorks = () => {
     {
       number: "1",
       icon: Plus,
-      title: "Create Collection",
+      title: "Create Request Page",
       description:
-        "Set up your personalized testimonial collection page with your address.",
+        "Set up your personalized testimonial request page with your address.",
       additionalContent: (
         <div
           className="mt-4 bg-[#404040] rounded p-3 cursor-pointer"
@@ -65,7 +65,7 @@ const HowItWorks = () => {
             How VouchMe Works?
           </h2>
           <p className="text-gray-400 text-xl md:text-lg font-medium">
-            Follow these simple steps to start collecting and showcasing
+            Follow these simple steps to start requesting and showcasing
             verified testimonials
           </p>
         </div>{" "}
@@ -108,7 +108,7 @@ const HowItWorks = () => {
             onClick={() => router.push("/dashboard")}
             className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg  transition-colors font-bold"
           >
-            Start Your Collection Now
+            Start Requesting Testimonials
           </button>
         </div>
       </div>

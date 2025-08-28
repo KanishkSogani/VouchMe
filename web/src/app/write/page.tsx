@@ -58,6 +58,7 @@ export default function WritePage() {
   const [receiverProfile, setReceiverProfile] = useState<Profile | null>(null);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
   const [sendMethod, setSendMethod] = useState<"waku" | "manual">("waku");
+  const [testimonialsCount, setTestimonialsCount] = useState(0);
 
   // Extract address from query string and fetch profile
   useEffect(() => {
@@ -85,6 +86,15 @@ export default function WritePage() {
           profile.contact.trim() !== "" &&
           profile.bio.trim() !== "";
         setIsProfileComplete(complete);
+
+        // Fetch testimonials count
+        try {
+          const count = await contract.getTestimonialCount(address);
+          setTestimonialsCount(Number(count));
+        } catch (error) {
+          console.error("Error fetching testimonials count:", error);
+          setTestimonialsCount(0);
+        }
 
         if (!complete) {
           const errorMessage =
@@ -261,7 +271,7 @@ export default function WritePage() {
         {/* Header Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4 text-white">
-            Create Testimonial
+            Write Testimonial
           </h1>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
             Share your authentic experience and help build trust in the
@@ -288,47 +298,52 @@ export default function WritePage() {
                       <h3 className="text-lg font-bold text-white mb-1">
                         {receiverProfile.name}
                       </h3>
-                      <div className="inline-flex items-center gap-1.5 text-green-400 text-xs bg-green-500/10 px-2 py-1 rounded-md border border-green-500/20">
-                        <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
-                        <span className="font-medium">Verified</span>
-                      </div>
                     </div>
 
                     {/* Bio Section */}
-                    <div className="text-left space-y-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-1 h-4 bg-indigo-500 rounded-full"></div>
-                        <span className="text-xs text-white font-medium uppercase tracking-wide">
-                          About
-                        </span>
+                    {receiverProfile.bio && (
+                      <div className="text-left space-y-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1 h-4 bg-indigo-500 rounded-full"></div>
+                          <span className="text-xs text-white font-medium uppercase tracking-wide">
+                            About
+                          </span>
+                        </div>
+                        <div className="bg-[#2a2a2a] rounded-lg p-3 border border-indigo-500/20">
+                          <p className="text-gray-300 text-sm leading-relaxed">
+                            {receiverProfile.bio}
+                          </p>
+                        </div>
                       </div>
-                      <div className="bg-[#2a2a2a] rounded-lg p-3 border border-[#3a3a3a]">
-                        <p className="text-gray-300 text-sm leading-relaxed">
-                          {receiverProfile.bio}
-                        </p>
-                      </div>
-                    </div>
+                    )}
 
                     {/* Contact Section */}
-                    <div className="text-left space-y-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-1 h-4 bg-indigo-500 rounded-full"></div>
-                        <span className="text-xs text-white font-medium uppercase tracking-wide">
-                          Contact
-                        </span>
+                    {receiverProfile.contact && (
+                      <div className="text-left space-y-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1 h-4 bg-indigo-500 rounded-full"></div>
+                          <span className="text-xs text-white font-medium uppercase tracking-wide">
+                            Contact
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 text-gray-300 text-sm p-3 bg-[#2a2a2a] rounded-lg border border-indigo-500/20">
+                          <Mail className="w-4 h-4 flex-shrink-0 text-indigo-400" />
+                          <span className="truncate">
+                            {receiverProfile.contact}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3 text-gray-300 text-sm p-3 bg-[#2a2a2a] rounded-lg border border-[#3a3a3a]">
-                        <Mail className="w-4 h-4 flex-shrink-0 text-indigo-400" />
-                        <span className="truncate">
-                          {receiverProfile.contact}
-                        </span>
-                      </div>
-                    </div>
+                    )}
 
+                    {/* Stats */}
                     <div className="pt-3 border-t border-[#3a3a3a]">
-                      <div className="flex items-center justify-center gap-2 text-green-400 text-xs">
-                        <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
-                        <span>Eligible to receive testimonials</span>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-white">
+                          {testimonialsCount}
+                        </div>
+                        <div className="text-xs text-gray-400 uppercase tracking-wider">
+                          Testimonials
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -362,80 +377,7 @@ export default function WritePage() {
           {/* Form Section - Right Side */}
           <div className="lg:col-span-2 order-2 lg:order-2">
             <div className="bg-[#1f1f1f] rounded-2xl p-8 border border-[#3a3a3a]">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-white mb-2">
-                  Write Your Testimonial
-                </h2>
-                <p className="text-gray-400 text-sm">
-                  Share your honest experience and feedback
-                </p>
-              </div>
-
               <form onSubmit={handleCreateSignedMessage} className="space-y-6">
-                {/* Waku Status and Send Method Selector */}
-                <div className="bg-[#2a2a2a] rounded-xl p-4 border border-[#3a3a3a]">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      {wakuConnected ? (
-                        <Wifi className="w-4 h-4 text-green-400" />
-                      ) : wakuConnecting ? (
-                        <div className="w-4 h-4 border-2 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin" />
-                      ) : (
-                        <WifiOff className="w-4 h-4 text-red-400" />
-                      )}
-                      <span className="text-sm font-medium text-gray-300">
-                        Waku Network:{" "}
-                        {wakuConnected
-                          ? "Connected"
-                          : wakuConnecting
-                          ? "Connecting..."
-                          : "Disconnected"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs text-gray-400 font-medium">
-                      Delivery Method
-                    </label>
-                    <div className="flex gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setSendMethod("waku")}
-                        disabled={!wakuConnected}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                          sendMethod === "waku" && wakuConnected
-                            ? "bg-green-600/20 text-green-400 border border-green-500/30"
-                            : wakuConnected
-                            ? "bg-[#3a3a3a] text-gray-300 border border-[#4a4a4a]"
-                            : "bg-[#2a2a2a] text-gray-500 border border-[#3a3a3a] cursor-not-allowed"
-                        }`}
-                      >
-                        <Send className="w-3 h-3" />
-                        Direct Send
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSendMethod("manual")}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                          sendMethod === "manual"
-                            ? "bg-green-600/20 text-green-400 border border-green-500/30"
-                            : "bg-[#3a3a3a] text-gray-300 border border-[#4a4a4a]"
-                        }`}
-                      >
-                        <Copy className="w-3 h-3" />
-                        Manual Share
-                      </button>
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      {sendMethod === "waku"
-                        ? wakuConnected
-                          ? "Testimonial will be sent directly to the recipient via Waku network"
-                          : "Waku network connection required for direct sending"
-                        : "Generate signed testimonial for manual sharing"}
-                    </p>
-                  </div>
-                </div>
                 {/* Your Name Field */}
                 <div className="space-y-2">
                   <label
@@ -513,6 +455,71 @@ export default function WritePage() {
                     >
                       {content.length} characters
                     </span>
+                  </div>
+                </div>
+
+                {/* Waku Status and Send Method Selector */}
+                <div className="bg-[#2a2a2a] rounded-xl p-4 border border-[#3a3a3a]">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      {wakuConnected ? (
+                        <Wifi className="w-4 h-4 text-green-400" />
+                      ) : wakuConnecting ? (
+                        <div className="w-4 h-4 border-2 border-yellow-400/30 border-t-yellow-400 rounded-full animate-spin" />
+                      ) : (
+                        <WifiOff className="w-4 h-4 text-red-400" />
+                      )}
+                      <span className="text-sm font-medium text-gray-300">
+                        Waku Network:{" "}
+                        {wakuConnected
+                          ? "Connected"
+                          : wakuConnecting
+                          ? "Connecting..."
+                          : "Disconnected"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs text-gray-400 font-medium">
+                      Delivery Method
+                    </label>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setSendMethod("waku")}
+                        disabled={!wakuConnected}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                          sendMethod === "waku" && wakuConnected
+                            ? "bg-green-600/20 text-green-400 border border-green-500/30"
+                            : wakuConnected
+                            ? "bg-[#3a3a3a] text-gray-300 border border-[#4a4a4a]"
+                            : "bg-[#2a2a2a] text-gray-500 border border-[#3a3a3a] cursor-not-allowed"
+                        }`}
+                      >
+                        <Send className="w-3 h-3" />
+                        Direct Send
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSendMethod("manual")}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                          sendMethod === "manual"
+                            ? "bg-green-600/20 text-green-400 border border-green-500/30"
+                            : "bg-[#3a3a3a] text-gray-300 border border-[#4a4a4a]"
+                        }`}
+                      >
+                        <Copy className="w-3 h-3" />
+                        Manual Share
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      {sendMethod === "waku"
+                        ? wakuConnected
+                          ? "Testimonial will be sent directly to the recipient via Waku network"
+                          : "Waku network connection required for direct sending"
+                        : "Generate signed testimonial for manual sharing"}
+                    </p>
                   </div>
                 </div>
 

@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     title: "VouchMe - Blockchain based Testimonial Platform",
     description:
       "VouchMe is a blockchain-based testimonial platform that enables users to provide testimonials securely and transparently, building a transparent and verifiable reputation system.",
-    images: ["/vouchme.png"],
+    images: ["/VouchMe.png"],
   },
 };
 

@@ -33,7 +33,7 @@ export const metadata: Metadata = {
         url: "/vouchme.png",
         width: 1200,
         height: 630,
-        alt: "VouchMe - Blockchain Testimonial Platform",
+        alt: "VouchMe - Blockchain based Testimonial Platform",
       },
     ],
     locale: "en_US",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "VouchMe - Blockchain Testimonial Platform",
+    title: "VouchMe - Blockchain based Testimonial Platform",
     description:
       "VouchMe is a blockchain-based testimonial platform that enables users to provide testimonials securely and transparently, building a transparent and verifiable reputation system.",
     images: ["/vouchme.png"],

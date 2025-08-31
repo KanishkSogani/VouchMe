@@ -1276,7 +1276,7 @@ export default function Dashboard() {
                                     onClick={() => {
                                       shareOnX(
                                         shareableLink,
-                                        "🌟 Help me build my reputation! Share your experience working with me:"
+                                        "Hi! I'd love to get your feedback. You can share your testimonial here:"
                                       );
                                       setShowRequestShareMenu(false);
                                     }}
@@ -1310,7 +1310,7 @@ export default function Dashboard() {
                                     onClick={() => {
                                       shareOnWhatsApp(
                                         shareableLink,
-                                        "Hi! I'd love to get your feedback about our collaboration. You can share your testimonial here:"
+                                        "Hi! I'd love to get your feedback. You can share your testimonial here:"
                                       );
                                       setShowRequestShareMenu(false);
                                     }}
@@ -1326,8 +1326,8 @@ export default function Dashboard() {
                                     onClick={() => {
                                       shareViaEmail(
                                         shareableLink,
-                                        "Request for Professional Testimonial",
-                                        "Hi,\n\nI hope you're doing well! I'd really appreciate if you could share a testimonial about our professional collaboration.\n\nYou can easily submit your testimonial using this secure link:"
+                                        "Request for Testimonial",
+                                        "Hi! I'd love to get your feedback. You can share your testimonial here:"
                                       );
                                       setShowRequestShareMenu(false);
                                     }}
@@ -1396,7 +1396,7 @@ export default function Dashboard() {
                                     onClick={() => {
                                       shareOnX(
                                         `${baseUrl}/testimonials?address=${address}`,
-                                        "Check out my professional testimonials and recommendations! 🌟"
+                                        "Check out my testimonials and recommendations here:"
                                       );
                                       setShowShowcaseShareMenu(false);
                                     }}
@@ -1432,7 +1432,7 @@ export default function Dashboard() {
                                     onClick={() => {
                                       shareOnWhatsApp(
                                         `${baseUrl}/testimonials?address=${address}`,
-                                        "Take a look at my professional testimonials and recommendations:"
+                                        "Check out my testimonials and recommendations here:"
                                       );
                                       setShowShowcaseShareMenu(false);
                                     }}
@@ -1448,8 +1448,8 @@ export default function Dashboard() {
                                     onClick={() => {
                                       shareViaEmail(
                                         `${baseUrl}/testimonials?address=${address}`,
-                                        "My Professional Testimonials",
-                                        "Hi,\n\nI wanted to share my professional testimonials and recommendations with you. You can view them here:"
+                                        "My Testimonials and Recommendations",
+                                        "Check out my testimonials and recommendations here:"
                                       );
                                       setShowShowcaseShareMenu(false);
                                     }}

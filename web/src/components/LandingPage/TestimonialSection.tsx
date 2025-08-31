@@ -43,7 +43,7 @@ const TestimonialsSection = () => {
                 onClick={() => router.push("/dashboard")}
                 className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-bold"
               >
-                Create Collection
+                Request Testimonial
               </button>
             </div>
           </div>

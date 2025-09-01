@@ -16,7 +16,7 @@ const HeroSection = () => {
       </h1>
 
       <p className="text-lg md:text-xl text-gray-300 mb-12 max-w-3xl">
-        Collect, secure, and showcase authentic testimonials to enhance
+        Request, secure, and showcase authentic testimonials to enhance
         reputation and accelerate growth.
       </p>
 
@@ -25,7 +25,7 @@ const HeroSection = () => {
           onClick={() => router.push("/dashboard")}
           className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-bold"
         >
-          Start Collecting Testimonials
+          Start Requesting Testimonials
         </button>
 
         <button

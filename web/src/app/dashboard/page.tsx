@@ -154,7 +154,7 @@ export default function Dashboard() {
   });
 
   // Share dropdown states
-  const [showCollectionShareMenu, setShowCollectionShareMenu] = useState(false);
+  const [showRequestShareMenu, setShowRequestShareMenu] = useState(false);
   const [showShowcaseShareMenu, setShowShowcaseShareMenu] = useState(false);
 
   // Auto-refresh tracking for first visit to received section
@@ -1058,7 +1058,7 @@ export default function Dashboard() {
             </h1>
             <p className="text-gray-400 mt-1">
               {activeView === "dashboard"
-                ? "Manage your testimonials and collection links"
+                ? "Manage your testimonials and Testimonial request links"
                 : activeView === "received"
                 ? "Review testimonials received via Waku network"
                 : "Manage your profile information"}
@@ -1220,16 +1220,16 @@ export default function Dashboard() {
                           Share Your Links
                         </h4>
                         <p className="text-sm text-gray-400">
-                          Collection and showcase links
+                          Testimonial Request and showcase links
                         </p>
                       </div>
                     </div>
 
                     <div className="space-y-4">
-                      {/* Collection Link */}
+                      {/* Request Link */}
                       <div>
                         <label className="text-sm font-medium text-gray-300 mb-3 block">
-                          Collection Link
+                          Testimonial Request Link
                         </label>
                         <div className="bg-[#1f1f1f] rounded-lg p-4 border border-[#3a3a3a]">
                           <div className="flex items-center gap-3">
@@ -1257,30 +1257,28 @@ export default function Dashboard() {
                         </div>
                         <div className="flex items-center justify-between mt-2">
                           <p className="text-xs text-gray-500">
-                            Share this link to collect testimonials from others
+                            Share this link to request testimonials from others
                           </p>
                           <div className="relative">
                             <button
                               onClick={() =>
-                                setShowCollectionShareMenu(
-                                  !showCollectionShareMenu
-                                )
+                                setShowRequestShareMenu(!showRequestShareMenu)
                               }
                               className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors"
                             >
                               <Share2 size={12} />
                               Share
                             </button>
-                            {showCollectionShareMenu && (
+                            {showRequestShareMenu && (
                               <div className="absolute right-0 top-8 bg-[#2a2a2a] border border-[#3a3a3a] rounded-lg shadow-lg z-10 p-3 min-w-[160px]">
                                 <div className="flex items-center justify-center gap-4">
                                   <button
                                     onClick={() => {
                                       shareOnX(
                                         shareableLink,
-                                        "🌟 Help me build my reputation! Share your experience working with me:"
+                                        "Hi! I'd love to get your feedback. You can share your testimonial here:"
                                       );
-                                      setShowCollectionShareMenu(false);
+                                      setShowRequestShareMenu(false);
                                     }}
                                     className="flex items-center justify-center p-3 rounded-lg bg-black/20 hover:bg-black/40 transition-all duration-200 hover:scale-110"
                                     title="Share on X"
@@ -1298,7 +1296,7 @@ export default function Dashboard() {
                                   <button
                                     onClick={() => {
                                       shareOnLinkedIn(shareableLink);
-                                      setShowCollectionShareMenu(false);
+                                      setShowRequestShareMenu(false);
                                     }}
                                     className="flex items-center justify-center p-3 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 transition-all duration-200 hover:scale-110"
                                     title="Share on LinkedIn"
@@ -1312,9 +1310,9 @@ export default function Dashboard() {
                                     onClick={() => {
                                       shareOnWhatsApp(
                                         shareableLink,
-                                        "Hi! I'd love to get your feedback about our collaboration. You can share your testimonial here:"
+                                        "Hi! I'd love to get your feedback. You can share your testimonial here:"
                                       );
-                                      setShowCollectionShareMenu(false);
+                                      setShowRequestShareMenu(false);
                                     }}
                                     className="flex items-center justify-center p-3 rounded-lg bg-green-500/20 hover:bg-green-500/40 transition-all duration-200 hover:scale-110"
                                     title="Share on WhatsApp"
@@ -1328,10 +1326,10 @@ export default function Dashboard() {
                                     onClick={() => {
                                       shareViaEmail(
                                         shareableLink,
-                                        "Request for Professional Testimonial",
-                                        "Hi,\n\nI hope you're doing well! I'd really appreciate if you could share a testimonial about our professional collaboration.\n\nYou can easily submit your testimonial using this secure link:"
+                                        "Request for Testimonial",
+                                        "Hi! I'd love to get your feedback. You can share your testimonial here:"
                                       );
-                                      setShowCollectionShareMenu(false);
+                                      setShowRequestShareMenu(false);
                                     }}
                                     className="flex items-center justify-center p-3 rounded-lg bg-gray-500/20 hover:bg-gray-500/40 transition-all duration-200 hover:scale-110"
                                     title="Share via Email"
@@ -1398,7 +1396,7 @@ export default function Dashboard() {
                                     onClick={() => {
                                       shareOnX(
                                         `${baseUrl}/testimonials?address=${address}`,
-                                        "Check out my professional testimonials and recommendations! 🌟"
+                                        "Check out my testimonials and recommendations here:"
                                       );
                                       setShowShowcaseShareMenu(false);
                                     }}
@@ -1434,7 +1432,7 @@ export default function Dashboard() {
                                     onClick={() => {
                                       shareOnWhatsApp(
                                         `${baseUrl}/testimonials?address=${address}`,
-                                        "Take a look at my professional testimonials and recommendations:"
+                                        "Check out my testimonials and recommendations here:"
                                       );
                                       setShowShowcaseShareMenu(false);
                                     }}
@@ -1450,8 +1448,8 @@ export default function Dashboard() {
                                     onClick={() => {
                                       shareViaEmail(
                                         `${baseUrl}/testimonials?address=${address}`,
-                                        "My Professional Testimonials",
-                                        "Hi,\n\nI wanted to share my professional testimonials and recommendations with you. You can view them here:"
+                                        "My Testimonials and Recommendations",
+                                        "Check out my testimonials and recommendations here:"
                                       );
                                       setShowShowcaseShareMenu(false);
                                     }}
@@ -1677,7 +1675,7 @@ export default function Dashboard() {
                         No testimonials yet
                       </h3>
                       <p className="text-gray-400 mb-6 max-w-md mx-auto">
-                        Share your collection link to start receiving
+                        Share your testimonial request link to start receiving
                         testimonials from colleagues and clients.
                       </p>
                       <button
@@ -1686,7 +1684,7 @@ export default function Dashboard() {
                       >
                         <div className="flex items-center gap-2">
                           <Copy className="w-4 h-4" />
-                          Copy Collection Link
+                          Copy Request Link
                         </div>
                       </button>
                     </div>

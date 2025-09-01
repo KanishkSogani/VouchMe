@@ -390,10 +390,6 @@ export default function TestimonialsPage() {
                       <h3 className="text-lg font-bold text-white mb-1">
                         {profile.name || "Professional User"}
                       </h3>
-                      <div className="inline-flex items-center gap-1.5 text-green-400 text-xs bg-green-500/10 px-2 py-1 rounded-md border border-green-500/20">
-                        <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
-                        <span className="font-medium">Verified</span>
-                      </div>
                     </div>
 
                     {/* Bio Section */}
@@ -540,11 +536,7 @@ export default function TestimonialsPage() {
                       </div>
 
                       {/* Footer */}
-                      <div className="flex items-center justify-between pt-4 border-t border-[#3a3a3a]">
-                        <div className="flex items-center gap-2 text-sm text-gray-400">
-                          <Shield size={14} className="text-green-400" />
-                          <span>Verified</span>
-                        </div>
+                      <div className="flex items-center justify-end pt-4 border-t border-[#3a3a3a]">
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                           <Calendar size={14} />
                           <span>

@@ -80,15 +80,8 @@ const HeroSection = () => {
             </button>
 
             <button
-              onClick={() =>
-                address
-                  ? router.push(`/testimonials?address=${address}`)
-                  : alert("Please connect your wallet to view your showcase.")
-              }
-              disabled={!address}
-              className={`w-full md:w-auto border border-indigo-400/30 text-indigo-400 hover:bg-indigo-400/10 hover:border-indigo-400/50 px-5 py-3 rounded-lg transition-all duration-200 ${
-                !address ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              onClick={() => router.push(`/testimonials?address=${address}`)}
+              className={`w-full md:w-auto border border-indigo-400/30 text-indigo-400 hover:bg-indigo-400/10 hover:border-indigo-400/50 px-5 py-3 rounded-lg transition-all duration-200 `}
             >
               View Showcase
             </button>

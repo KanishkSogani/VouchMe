@@ -39,13 +39,6 @@ const FeaturesSection = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16 sm:mb-20">
-          <div className="inline-flex items-center px-4 py-2 rounded-full border border-indigo-500/20 bg-indigo-500/5 backdrop-blur-sm mb-6">
-            <Shield className="w-4 h-4 mr-2 text-indigo-400" />
-            <span className="text-sm text-indigo-400 font-medium">
-              Why Choose VouchMe
-            </span>
-          </div>
-
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 text-white">
             VouchMe
             <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
@@ -70,12 +63,12 @@ const FeaturesSection = () => {
               <Card className="bg-gray-900/50 border-gray-800/50 backdrop-blur-sm hover:bg-gray-900/70 hover:border-gray-700/50 transition-all duration-300 group h-full">
                 <CardContent className="p-6 sm:p-8">
                   <div
-                    className={`w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br ${feature.gradient} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-200`}
+                    className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${feature.gradient} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-200`}
                   >
-                    <feature.icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                    <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
 
-                  <h3 className="text-xl sm:text-2xl font-bold mb-4 text-white group-hover:text-indigo-400 transition-colors duration-200">
+                  <h3 className="text-xl font-bold mb-4 text-white group-hover:text-indigo-400 transition-colors duration-200">
                     {feature.title}
                   </h3>
 

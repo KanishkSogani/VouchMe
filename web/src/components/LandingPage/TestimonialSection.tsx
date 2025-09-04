@@ -1,61 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { CountUp } from "@/components/ui/count-up";
 import { useRouter } from "next/navigation";
 import { Shield, Users, FileText, CheckCircle, Verified } from "lucide-react";
 
 const TestimonialsSection = () => {
   const router = useRouter();
-  const [totalUsers, setTotalUsers] = useState(0);
-  const [totalTestimonials, setTotalTestimonials] = useState(0);
-  const [hasAnimated, setHasAnimated] = useState(false);
-
-  // Scroll-triggered animation
-  useEffect(() => {
-    const animateCounter = (
-      setValue: (value: number) => void,
-      targetValue: number,
-      duration: number
-    ) => {
-      let startTime: number;
-      const animate = (currentTime: number) => {
-        if (!startTime) startTime = currentTime;
-        const progress = Math.min((currentTime - startTime) / duration, 1);
-
-        const currentValue = Math.floor(progress * targetValue);
-        setValue(currentValue);
-
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        }
-      };
-      requestAnimationFrame(animate);
-    };
-
-    const handleScroll = () => {
-      const section = document.getElementById("testimonials");
-      if (section && !hasAnimated) {
-        const rect = section.getBoundingClientRect();
-        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
-
-        if (isVisible) {
-          setHasAnimated(true);
-          // Start animations with delays
-          setTimeout(() => animateCounter(setTotalUsers, 5420, 2000), 500);
-          setTimeout(
-            () => animateCounter(setTotalTestimonials, 12800, 2000),
-            700
-          );
-        }
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    handleScroll(); // Check initial state
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [hasAnimated]);
 
   return (
     <section
@@ -97,7 +49,7 @@ const TestimonialsSection = () => {
                   <Users className="w-6 h-6 text-indigo-400" />
                 </div>
                 <div className="text-3xl sm:text-4xl font-bold text-white mb-2">
-                  {totalUsers.toLocaleString()}+
+                  <CountUp value={5420} delay={500} />+
                 </div>
                 <div className="text-sm text-gray-400 font-medium">
                   Total Users
@@ -109,7 +61,7 @@ const TestimonialsSection = () => {
                   <FileText className="w-6 h-6 text-indigo-400" />
                 </div>
                 <div className="text-3xl sm:text-4xl font-bold text-white mb-2">
-                  {totalTestimonials.toLocaleString()}+
+                  <CountUp value={12800} delay={500} />+
                 </div>
                 <div className="text-sm text-gray-400 font-medium">
                   Total Testimonials
